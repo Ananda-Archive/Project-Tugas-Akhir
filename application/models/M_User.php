@@ -7,27 +7,14 @@ class M_User extends CI_Model{
     private $nim;
     private $password;
 
-    public function login() {
-        $this->nim = $this->input->post('nim');
-        $this->password = $this->input->post('password');
+    public function login($nim,$password) {
+        $this->nim = $nim;
+        $this->password = $password;
 
-        $this->db->get_where('user', array (
+        return $this->db->get_where('user', array (
             'nim' => $this->nim,
             'password' => $this->password
         ));
-
-        if($this->db->affected_rows()) {
-            $this->nim = $this->input->post('nim');
-            return array(
-                'status' => TRUE,
-                'data' => $this->db->get_where('user', "nim='{$this->nim}'")->result_array()
-            );
-        } else {
-            return array(
-                'status' => 'FALSE',
-                'data' => $this->db->get_where('user', "nim='{$this->nim}'")->result_array()
-            );
-        }
     }
     
 }

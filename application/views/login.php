@@ -7,12 +7,14 @@
 					<v-layout align-center fill-height>
                         <v-container fluid>
                             <v-row align="center" justify="center">
-                                <v-col cols="12" sm="8" md="3">
+                                <v-col cols="12" sm="8" md="4">
                                     <v-card class="elevation-12" :disabled="loading">
                                         <v-toolbar color="blue" flat>
                                             <v-toolbar-title>Login</v-toolbar-title>
                                             <v-spacer></v-spacer>
-                                            <v-avatar class="mr-n4"><v-icon>mdi-login-variant</v-icon></v-avatar>
+                                            <div>
+                                                <v-avatar class="mr-n4"><v-icon>mdi-login-variant</v-icon></v-avatar>
+                                            </div>
                                         </v-toolbar>
                                         <v-card-text>
                                             <v-form>
@@ -52,7 +54,7 @@
         </div>
 
         <script>
-            
+
 			new Vue({
 				el: '#app',
 				vuetify: new Vuetify(),
@@ -85,6 +87,7 @@
 
 				methods: {
                     login() {
+                        this.loading = true
                         const data = new FormData()
                         data.append('nim',this.nim)
                         data.append('password',this.password)
@@ -92,12 +95,15 @@
                         return new Promise((resolve, reject) => {
                             axios.post('http://localhost:8000/api/User', data)
                                 .then(response => {
-                                    (response.data.status) ? resolve(response.data.data) : reject("NIM atau password Salah")
+                                    (response.data.status) ? resolve(response.data) : reject("NIM atau Password Salah")
                                 }) .catch(err => {
                                     console.log(err)
                                     reject('Sistem Error')
                                 })
                         })
+                        // .then((response) => {
+                        //     if(response.status)
+                        // })
                     }
 				},
 				
