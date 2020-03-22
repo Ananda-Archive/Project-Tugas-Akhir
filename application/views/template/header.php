@@ -12,4 +12,3 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 		<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
-	</head>
