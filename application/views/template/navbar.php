@@ -1,6 +1,6 @@
 <v-app-bar app dark clipped-left>
-    <v-app-bar-title v-if="!popUpBreakPoint">Informatika Universitas Diponegoro</v-app-bar-title>
-    <v-app-bar-title v-else class="body-2 font-weight-thin">Informatika Universitas Diponegoro</v-app-bar-title>
+    <span v-if="!popUpBreakPoint">Informatika Universitas Diponegoro</span>
+    <span v-else class="body-2 font-weight-thin">Informatika Universitas Diponegoro</span>
     <v-spacer></v-spacer>
     <span v-if="!popUpBreakPoint" class="body-1 mr-4"><?=$nama?></span>
     <div v-if="profileImage != ''">

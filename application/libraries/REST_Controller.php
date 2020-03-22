@@ -29,6 +29,7 @@ abstract class REST_Controller extends \CI_Controller {
     const LOGIN_FAILED_MESSAGE = 'Login Failed.';
     const INSERT_SUCCESS_MESSSAGE = 'Insert success.';
     const INSERT_FAILED_MESSAGE = 'Insert failed.';
+    const NUMBER_FAILED_MESSAGE = 'NIM / NIP already exists.';
     const UPDATE_SUCCESS_MESSSAGE = 'Update success.';
     const UPDATE_FAILED_MESSAGE = 'Update failed.';
     const DELETE_SUCCESS_MESSSAGE = 'Delete success.';
