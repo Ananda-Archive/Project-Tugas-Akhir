@@ -51,7 +51,6 @@ class User_Login extends REST_Controller {
                 'id' => $data['id'],
                 'nama' => $data['nama'],
                 'nomor' => $data['nomor'],
-                'password' => $data['password'],
                 'role' => $data['role']
             );
             $this->session->set_userdata($data_session);

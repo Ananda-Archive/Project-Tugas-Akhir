@@ -1,5 +1,6 @@
 <?php require('template/header.php'); ?>
-
+    <title>Login</title>
+    </head>
     <body>
         <div id="app">
 			<v-app>
@@ -21,7 +22,7 @@
                                                 <v-text-field
                                                     v-model="nomor"
                                                     v-on:keyup.enter="login"
-                                                    label="nomor"
+                                                    label="NIP / NIM"
                                                     :rules='rules.nomor'
                                                 ></v-text-field>
                                                 <v-text-field
@@ -91,6 +92,7 @@
                         snackBarMessage: '',
                         errorMessage: '',
                         showPassword: false,
+                        logInstatus: false,
                         rules: {
                             nomor: [
                                 v => !!v || 'nomor Wajib diisi',
@@ -122,6 +124,8 @@
                             })
                             .then((response) => {
                                 console.log(response.message)
+                                this.errorMessage = ''
+                                this.logInstatus = true
                             }) .catch(err => {
                                 if(err.message == "User Not Found" || err.message == "Incorrect Password") {
                                     this.errorMessage = err.message
@@ -131,7 +135,11 @@
                                     this.snackBar = true
                                 }
                             }) .finally(() => {
-                                this.loading = false
+                                if(this.logInstatus) {
+                                    window.location.href = '<?=base_url('home');?>'
+                                } else {
+                                    this.loading = false
+                                }
                                 
                             })
                         }
