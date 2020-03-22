@@ -28,6 +28,8 @@ class User extends REST_Controller {
                 $role = $this->post('role');
                 $dosen_penguji = $this->post('dosen_penguji');
                 $id_dosen_pembimbing = $this->post('id_dosen_pembimbing');
+                $id_ketua_penguji = $this->post('id_ketua_penguji');
+                $id_dosen_penguji = $this->post('id_dosen_penguji');
                 if(!isset($nomor)) {
                     $this->response(
                         array(
@@ -65,18 +67,7 @@ class User extends REST_Controller {
                     return;
                 }
                 if($this->M_User->get_by_nomor($nomor)->num_rows() == 0) {
-                    if($user_id = $this->M_User->insert($nomor,$nama,$password,$role,$id_dosen_pembimbing)) {
-                        if(isset($dosen_penguji)) {
-                            if(!$this->M_Dosen_Penguji->insert($dosen_penguji, $user_id)) {
-                                $this->response(
-                                    array(
-                                        'status' => FALSE,
-                                        'message' => $this::INSERT_FAILED_MESSAGE." failed to insert Dosen Penguji"
-                                    ),REST_Controller::HTTP_INTERNAL_SERVER_ERROR
-                                );
-                                return;
-                            }
-                        }
+                    if($this->M_User->insert($nomor,$nama,$password,$role,$id_dosen_pembimbing,$id_ketua_penguji,$id_dosen_penguji)) {
                         $this->response(
                             array(
                                 'status' => TRUE,
@@ -110,24 +101,9 @@ class User extends REST_Controller {
         $role = $this->get('role');
         if (isset($id)) {
             $result = $this->M_User->get_user_where($id);
-            if($role == 0) {
-                $dosen = $this->M_Dosen_Penguji->get_dosen_penguji_where($id);
-                $result = array_merge($result[0],array('dosen' => $dosen));
-            }
-
             $this->response($result,REST_Controller::HTTP_OK);
         } else {
             $result = $this->M_User->get_all_user();
-            if($role == 0) {
-                $res =[];
-                $index = 0;
-                foreach ($result as $row){
-                    $dosen = $this->M_Dosen_Penguji->get_dosen_penguji_where($row['id']);
-                    $temp = array_merge($result[$index], array('dosen' => $dosen));
-                    $result[$index] = $temp;
-                    $index++;
-                }
-            }
             $this->response($result,REST_Controller::HTTP_OK);
         }
     }
