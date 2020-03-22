@@ -17,12 +17,12 @@
                                             </div>
                                         </v-toolbar>
                                         <v-card-text>
-                                            <v-form>
+                                            <v-form ref="form">
                                                 <v-text-field
-                                                    v-model="nim"
+                                                    v-model="nomor"
                                                     v-on:keyup.enter="login"
-                                                    label="NIM"
-                                                    :rules='rules.nim'
+                                                    label="nomor"
+                                                    :rules='rules.nomor'
                                                 ></v-text-field>
                                                 <v-text-field
                                                     v-model="password"
@@ -36,10 +36,13 @@
                                             </v-form>
                                         </v-card-text>
                                         <v-card-actions>
+                                            <v-btn text color="red" style="pointer-events: none" class="mt-n7 mb-2 mr-1">
+                                                <span class="body-2">{{errorMessage}}</span>
+                                            </v-btn>
                                             <v-spacer></v-spacer>
                                             <v-btn color="primary" class="mt-n7 mb-2 mr-1" @click="login">
                                                 <span v-if="loading">
-                                                    <v-progress-circular size="20" :indeterminate="{loading}"></v-progress-circular>
+                                                    <v-progress-circular size="20" :indeterminate="loading"></v-progress-circular>
                                                 </span>
                                                 <span v-else class="body-2">Login</span>
                                             </v-btn>
@@ -49,6 +52,21 @@
                             </v-row>
                         </v-container>
                     </v-layout>
+                    <v-snackbar
+                        v-model="snackBar"
+                        multi-line
+                        v-bind:color="snackBarColor"
+                    >
+                        {{ snackBarMessage }}
+                        <v-btn
+                            text
+                            @click="snackBar = false"
+                        >
+                            <v-icon>
+                                mdi-close
+                            </v-icon>
+                        </v-btn>
+                    </v-snackbar>
 				</v-content>
 			</v-app>
         </div>
@@ -65,18 +83,18 @@
 
 				data() {
 					return {
-                        apiEndPoint:'http://localhost:8000/',
-						nim:'',
+						nomor:'',
                         password:'',
                         loading: false,
                         snackBar: false,
                         snackBarColor: '',
                         snackBarMessage: '',
+                        errorMessage: '',
                         showPassword: false,
                         rules: {
-                            nim: [
-                                v => !!v || 'NIM Wajib diisi',
-                                v => /^[0-9]*$/.test(v) || 'NIM Harus berupa angka'
+                            nomor: [
+                                v => !!v || 'nomor Wajib diisi',
+                                v => /^[0-9]*$/.test(v) || 'nomor Harus berupa angka'
                             ],
                             password: [
                                 v => !!v || 'Password Wajib diisi',
@@ -87,23 +105,36 @@
 
 				methods: {
                     login() {
-                        this.loading = true
-                        const data = new FormData()
-                        data.append('nim',this.nim)
-                        data.append('password',this.password)
+                        if(this.$refs.form.validate()) {
+                            this.loading = true
+                            const data = new FormData()
+                            data.append('nomor',this.nomor)
+                            data.append('password',this.password)
 
-                        return new Promise((resolve, reject) => {
-                            axios.post('http://localhost:8000/api/User', data)
-                                .then(response => {
-                                    (response.data.status) ? resolve(response.data) : reject("NIM atau Password Salah")
-                                }) .catch(err => {
-                                    console.log(err)
-                                    reject('Sistem Error')
-                                })
-                        })
-                        // .then((response) => {
-                        //     if(response.status)
-                        // })
+                            return new Promise((resolve, reject) => {
+                                axios.post('<?= base_url()?>api/User_Login', data)
+                                    .then(response => {
+                                        resolve(response.data)
+                                    }) .catch(err => {
+                                        if(err.response.status == 500) reject('Server Error')
+                                        if(err.response.status == 401) reject(err.response.data)
+                                    })
+                            })
+                            .then((response) => {
+                                console.log(response.message)
+                            }) .catch(err => {
+                                if(err.message == "User Not Found" || err.message == "Incorrect Password") {
+                                    this.errorMessage = err.message
+                                } else {
+                                    this.snackBarMessage = err
+                                    this.snackBarColor = 'error'
+                                    this.snackBar = true
+                                }
+                            }) .finally(() => {
+                                this.loading = false
+                                
+                            })
+                        }
                     }
 				},
 				

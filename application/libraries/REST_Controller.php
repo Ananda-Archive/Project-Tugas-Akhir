@@ -23,6 +23,10 @@ abstract class REST_Controller extends \CI_Controller {
     // Note: Only the widely used HTTP status codes are documented
 
     // Message Information
+    const LOGIN_SUCCESS_MESSAGE = 'Login Success.';
+    const INCORRECT_PASSWORD_MESSAGE = 'Incorrect Password';
+    const USER_NOT_FOUND_MESSAGE = 'User Not Found';
+    const LOGIN_FAILED_MESSAGE = 'Login Failed.';
     const INSERT_SUCCESS_MESSSAGE = 'Insert success.';
     const INSERT_FAILED_MESSAGE = 'Insert failed.';
     const UPDATE_SUCCESS_MESSSAGE = 'Update success.';

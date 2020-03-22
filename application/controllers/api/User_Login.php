@@ -6,7 +6,7 @@ require APPPATH . '/libraries/REST_Controller.php';
 
 use Restserver\Libraries\REST_Controller;
 
-class User extends REST_Controller {
+class User_Login extends REST_Controller {
 
     function __construct(){
         parent::__construct();
@@ -22,14 +22,14 @@ class User extends REST_Controller {
 
     public function index_post(){
         $nama = $this->post('nama');
-        $nim = $this->post('nim');
+        $nomor = $this->post('nomor');
         $password = $this->post('password');
-        // Kalau parameter nim kosong
-        if(!isset($nim)) {
+        // Kalau parameter nomor kosong
+        if(!isset($nomor)) {
             $this->response(
                 array(
                     'status' => FALSE,
-                    'message' => $this::REQUIRED_PARAMETER_MESSAGE."nim"
+                    'message' => $this::REQUIRED_PARAMETER_MESSAGE."nomor"
                 ), REST_Controller::HTTP_BAD_REQUEST
             );
             return;
@@ -45,28 +45,47 @@ class User extends REST_Controller {
             return;
         }
         // Kalau parameter terisi dan benar
-        if($this->M_User->login($nim,$password)->num_rows() > 0) {
-            $data = $this->M_User->login($nim,$password)->row_array();
+        if($this->M_User->login($nomor,$password)->num_rows() > 0) {
+            $data = $this->M_User->login($nomor,$password)->row_array();
             $data_session = array(
                 'id' => $data['id'],
                 'nama' => $data['nama'],
-                'nim' => $data['nim'],
-                'password' => $data['password']
+                'nomor' => $data['nomor'],
+                'password' => $data['password'],
+                'role' => $data['role']
             );
             $this->session->set_userdata($data_session);
             $this->response(
                 array(
                     'status' => TRUE,
-                    'message' => $this::INSERT_SUCCESS_MESSSAGE
+                    'message' => $this::LOGIN_SUCCESS_MESSAGE
                 ), REST_Controller::HTTP_CREATED
             );
         } else {
-            $this->response(
-                array(
-                    'status' => FALSE,
-                    'message' => $this::REQUIRED_PARAMETER_MESSAGE
-                ), REST_Controller::HTTP_INTERNAL_SERVER_ERROR
-            );
+            if($this->M_User->get_by_nomor($nomor)->num_rows() > 0) {
+                $this->response(
+                    array(
+                        'status' => FALSE,
+                        'message' => $this::INCORRECT_PASSWORD_MESSAGE
+                    ), REST_Controller::HTTP_UNAUTHORIZED
+                );
+            } else {
+                if($this->M_User->get_by_nomor($nomor)->num_rows() == 0) {
+                    $this->response(
+                        array(
+                            'status' => FALSE,
+                            'message' => $this::USER_NOT_FOUND_MESSAGE
+                        ), REST_Controller::HTTP_UNAUTHORIZED
+                    );
+                } else {
+                    $this->response(
+                        array(
+                            'status' => FALSE,
+                            'message' => $this::LOGIN_FAILED_MESSAGE
+                        ), REST_Controller::HTTP_INTERNAL_SERVER_ERROR
+                    );
+                }
+            }
         }
     }
 }
