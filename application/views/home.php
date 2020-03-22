@@ -10,7 +10,7 @@
                         <v-container fluid>
                             <v-row align="center">
 								<v-col cols="12" sm="12" md="3">
-                                    <v-card @click="createNewUserPopUp" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
+                                    <v-card @click="createNewUserDialog = !createNewUserDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
 											<div>
 												<v-card-title class="font-weight-light">CREATE NEW USER</v-card-title>
@@ -79,7 +79,7 @@
 													<v-col cols="12">
 														<v-autocomplete
 															v-if="user.role == 0"
-															v-model="dosen_penguji_satu"
+															v-model="user.id_ketua_penguji"
 															:items="listDosen"
 															label="Ketua Dosen Penguji"
 															chips
@@ -93,8 +93,8 @@
 															@change="ketuaDosenPengujiInput=''"
 															item-text="nama"
 															item-value="id"
-															:readonly="dosen_penguji_satu != null"
-															@click:clear="dosen_penguji_satu = null"
+															:readonly="user.id_ketua_penguji != null"
+															@click:clear="user.id_ketua_penguji = null"
 															class="mb-n2"
 														>
 														<template v-slot:selection="data">
@@ -107,7 +107,7 @@
 													<v-col cols="12">
 														<v-autocomplete
 															v-if="user.role == 0"
-															v-model="dosen_penguji_dua"
+															v-model="user.id_dosen_penguji"
 															:items="listDosen"
 															label="Dosen Penguji 1"
 															chips
@@ -121,8 +121,8 @@
 															@change="dosenPengujiInput=''"
 															item-text="nama"
 															item-value="id"
-															:readonly="dosen_penguji_dua != null"
-															@click:clear="dosen_penguji_dua = null"
+															:readonly="user.id_dosen_penguji != null"
+															@click:clear="user.id_dosen_penguji = null"
 															class="mb-n2"
 														>
 														<template v-slot:selection="data">
@@ -146,10 +146,10 @@
 									</v-card>
 								</v-dialog>
 								<v-col cols="12" sm="12" md="3">
-                                    <v-card @click="" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
+                                    <v-card @click="listMahasiswaDialog = !listMahasiswaDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
 											<div>
-												<v-card-title class="font-weight-light">MAHASISWA & DOSEN</v-card-title>
+												<v-card-title class="font-weight-light">LIST MAHASISWA</v-card-title>
 											</div>
 											<div>
 												<v-card-title class="font-weight-light"><v-icon>mdi-format-list-numbered</v-icon></v-card-title>
@@ -158,6 +158,114 @@
 										<v-card-title class="justify-center"><v-icon class="display-4">mdi-account-group-outline</v-icon></v-card-title>
                                     </v-card>
                                 </v-col>
+								<v-dialog v-model="listMahasiswaDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+									<v-card>
+										<v-toolbar dense flat color="blue">
+											<span class="title font-weight-light">List Mahasiswa</span>
+											<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
+										</v-toolbar>
+										<v-col cols="12">
+											<v-text-field
+												placeholder="Cari Mahasiswa"
+												:solo='true'
+												:clearable='true'
+												append-icon="mdi-magnify"
+												class="font-regular font-weight-light mt-2 mb-n4"
+												v-model="searchMahasiswa"
+											/>
+										</v-col>
+										<v-data-table
+											:headers='mahasiswaHeader'
+											:items='users'
+											v-if="!popUpBreakPoint"
+											item-key="nama"
+											:search="searchMahasiswa"
+										></v-data-table>
+										<v-data-table
+											:headers='mahasiswaHeader'
+											:items='users'
+											v-else
+											item-key="nama"
+											:search="searchMahasiswa"
+											:disable-sort="true"
+											class="mt-n10"
+										>
+											<template v-slot:item="{ item }">
+												<v-card class="mt-1 mb-3 mx-2 pa-2" outlined>
+													<div class="d-flex flex-no-wrap justify-space-between align-center">
+														<div>
+															<v-card-title class="body-2 mt-n2">{{ item.nama }}</v-card-title>
+														</div>
+														<div class="mt-n2 mr-n2">
+															<v-menu
+																:close-on-click="true"
+																:close-on-content-click="true"
+																:offset-y="true"
+															>
+																<template v-slot:activator="{ on }">
+																	<v-card-actions><v-icon v-on="on">mdi-dots-vertical</v-icon></v-card-actions>
+																</template>
+																<v-list>
+																	<v-list-item @click.stop="">
+																		<v-list-item-title>Edit</v-list-item-title>
+																	</v-list-item>
+																	<v-list-item @click.stop="">
+																		<v-list-item-title>Hapus</v-list-item-title>
+																	</v-list-item>
+																</v-list>
+															</v-menu>
+														</div>
+													</div>
+													<v-divider></v-divider>
+													<v-list-item two-line>
+														<v-list-item-content>
+															<v-list-item-title>Dosen Pembimbing</v-list-item-title>
+															<v-list-item-subtitle>{{ item.id_dosen_pembimbing }}</v-list-item-subtitle>
+														</v-list-item-content>
+													</v-list-item>
+													<v-list-item two-line class="mt-n2">
+														<v-list-item-content>
+															<v-list-item-title>Ketua Dosen Penguji</v-list-item-title>
+															<v-list-item-subtitle>{{ item.id_ketua_penguji }}</v-list-item-subtitle>
+														</v-list-item-content>
+													</v-list-item>
+													<v-list-item two-line class="mt-n2">
+														<v-list-item-content>
+															<v-list-item-title>Dosen Penguji 1</v-list-item-title>
+															<v-list-item-subtitle>{{ item.id_dosen_penguji }}</v-list-item-subtitle>
+														</v-list-item-content>
+													</v-list-item>
+												</v-card>
+											</template>
+										</v-data-table>
+									</v-card>
+								</v-dialog>
+								<v-col cols="12" sm="12" md="3">
+                                    <v-card @click="listDosenDialog = !listDosenDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
+                                        <div class="d-flex flex-no-wrap justify-space-between">
+											<div>
+												<v-card-title class="font-weight-light">LIST DOSEN</v-card-title>
+											</div>
+											<div>
+												<v-card-title class="font-weight-light"><v-icon>mdi-format-list-numbered</v-icon></v-card-title>
+											</div>
+										</div>
+										<v-card-title class="justify-center"><v-icon class="display-4">mdi-teach</v-icon></v-card-title>
+                                    </v-card>
+                                </v-col>
+								<v-dialog v-model="listDosenDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+									<v-card>
+										<v-toolbar dense flat color="blue">
+											<span class="title font-weight-light">List Dosen</span>
+											<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
+										</v-toolbar>
+										<v-data-table
+											:headers='dosenHeader'
+											:items='users'
+											:mobile-breakpoint="1"
+										></v-data-table>
+									</v-card>
+								</v-dialog>
 								<v-col cols="12" sm="12" md="3">
                                     <v-card @click="" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
@@ -223,6 +331,8 @@
 					return {
 						profileImage:'',
 						createNewUserDialog: false,
+						listMahasiswaDialog: false,
+						listDosenDialog: false,
 						users: [],
 						listDosen: [],
 						user: {
@@ -239,13 +349,13 @@
 							nama:'',
 							role:'',
 							id_dosen_pembimbing:null,
-							dosen_penguji:[]
+							id_ketua_penguji:null,
+							id_dosen_penguji:null
 						},
 						dosenPembimbingInput:'',
+						searchMahasiswa:'',
 						ketuaDosenPengujiInput:'',
 						dosenPengujiInput:'',
-						dosen_penguji_satu:null,
-						dosen_penguji_dua:null,
 						listRole: [
 							{id:0, value:'Mahasiswa'},
 							{id:1, value:'Dosen Penguji'},
@@ -296,14 +406,7 @@
 							})
 						})
 					},
-					createNewUserPopUp() {
-						this.createNewUserDialog = true
-					},
 					createNewUser() {
-						if(this.dosen_penguji_satu != null) {
-							this.user.dosen_penguji.push(this.dosen_penguji_satu)
-							this.user.dosen_penguji.push(this.dosen_penguji_dua)
-						}
 						return new Promise((resolve, reject) => {
 							axios.post('<?= base_url()?>api/User',this.user)
 								.then(response => {
@@ -347,7 +450,22 @@
                         } else {
                             return false
                         }
-                    }
+                    },
+					mahasiswaHeader() {
+						return [
+							{text:'Nama', value:'nama'},
+							{value:'role', align: ' d-none', filter: value => {return value == 0}},
+							{text:'Dosen Pembimbing', value:'id_dosen_pembimbing', filter: () => true},
+							{text:'Ketua Dosen Penguji', value:'id_ketua_penguji', filter: () => true},
+							{text:'Dosen Penguji 1', value:'id_dosen_penguji', filter: () => true}
+						]
+					},
+					dosenHeader() {
+						return [
+							{text:'Nama', value:'nama'},
+							{value:'role', align: ' d-none', filter: value => {return value == 1}},
+						]
+					}
 				},
 
 			})
