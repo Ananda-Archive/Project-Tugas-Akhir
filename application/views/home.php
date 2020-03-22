@@ -50,6 +50,7 @@
 													</v-col>
 													<v-col cols="12">
 														<v-autocomplete
+															v-if="user.role == 0"
 															v-model="user.id_dosen_pembimbing"
 															:items="listDosen"
 															label="Dosen Pembimbing"
@@ -77,6 +78,7 @@
 													</v-col>
 													<v-col cols="12">
 														<v-autocomplete
+															v-if="user.role == 0"
 															v-model="dosen_penguji_satu"
 															:items="listDosen"
 															label="Ketua Dosen Penguji"
@@ -104,6 +106,7 @@
 													</v-col>
 													<v-col cols="12">
 														<v-autocomplete
+															v-if="user.role == 0"
 															v-model="dosen_penguji_dua"
 															:items="listDosen"
 															label="Dosen Penguji 1"
@@ -135,8 +138,8 @@
 										<v-card-actions>
 											<v-container>
 												<v-row justify="center">
-													<v-btn  color="red darken-1" text @click="close">Cancel</v-btn>
-													<v-btn  color="green white--text" @click="createNewUser">Create</v-btn>
+													<v-btn class="mt-n8" color="red darken-1" text @click="close">Cancel</v-btn>
+													<v-btn class="mt-n8" color="green white--text" @click="createNewUser">Create</v-btn>
 												</v-row>
 											</v-container>
 										</v-card-actions>
@@ -223,6 +226,14 @@
 						users: [],
 						listDosen: [],
 						user: {
+							id:null,
+							nomor:'',
+							nama:'',
+							role:'',
+							id_dosen_pembimbing:null,
+							dosen_penguji:[]
+						},
+						userDefault: {
 							id:null,
 							nomor:'',
 							nama:'',
@@ -317,6 +328,7 @@
 						}) .finally(() => {
 							this.snackBar = true
 							this.get()
+							this.user = Object.assign({},this.userDefault)
 							this.close()
 						})
 					},
