@@ -7,6 +7,9 @@ class M_User extends CI_Model{
     private $nomor;
     private $password;
     private $role;
+    private $id_dosen_pembimbing;
+    private $id_ketua_penguji;
+    private $id_dosen_penguji;
     const TABLE_NAME = 'user';
 
     public function login($nomor,$password) {
@@ -19,13 +22,15 @@ class M_User extends CI_Model{
         ));
     }
 
-    public function insert($nomor,$nama,$password,$role,$id_dosen_pembimbing) {
+    public function insert($nomor,$nama,$password,$role,$id_dosen_pembimbing,$id_ketua_penguji,$id_dosen_penguji) {
         $this->db->insert($this::TABLE_NAME, array(
             'nomor' => $nomor,
             'nama' => $nama,
             'password ' => $password,
             'role' => $role,
-            'id_dosen_pembimbing' => $id_dosen_pembimbing
+            'id_dosen_pembimbing' => $id_dosen_pembimbing,
+            'id_ketua_penguji' => $id_ketua_penguji,
+            'id_dosen_penguji' => $id_dosen_penguji
         ));
         return $this->db->insert_id();
     }
