@@ -136,7 +136,13 @@
                                 }
                             }) .finally(() => {
                                 if(this.logInstatus) {
-                                    window.location.href = '<?=base_url('home');?>'
+                                    if(<?=$role?>==2) {
+                                        window.location.href = '<?=base_url('home');?>'
+                                    } else {
+                                        if(<?=$role?>==0) {
+                                            window.location.href = '<?=base_url('home_mahasiswa');?>'
+                                        }
+                                    }
                                 } else {
                                     this.loading = false
                                 }

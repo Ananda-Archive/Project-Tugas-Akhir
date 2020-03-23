@@ -10,7 +10,13 @@ class Home extends CI_Controller {
             $data['nama'] = $this->session->userdata('nama');
             $data['nomor'] = $this->session->userdata('nomor');
             $data['role'] = $this->session->userdata('role');
-            $this->load->view('home',$data);
+            if($this->session->userdata('role') == 2) {
+                $this->load->view('home',$data);
+            } else {
+                if($this->session->userdata('role') == 0) {
+                    $this->load->view('home_mahasiswa',$data);
+                }
+            }
         } else {
             redirect('login');
         }

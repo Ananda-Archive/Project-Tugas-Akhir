@@ -9,7 +9,7 @@
 					<v-layout fill-height>
                         <v-container fluid>
                             <v-row align="center">
-								<v-col cols="12" sm="12" md="3">
+								<v-col cols="12" sm="12" md="3" v-if="<?=$role?>==2">
                                     <v-card @click="createNewUserDialog = !createNewUserDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
 											<div>
@@ -142,7 +142,7 @@
 										</v-card-actions>
 									</v-card>
 								</v-dialog>
-								<v-col cols="12" sm="12" md="3">
+								<v-col cols="12" sm="12" md="3" v-if="<?=$role?>==2">
                                     <v-card @click="listMahasiswaDialog = !listMahasiswaDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
 											<div>
@@ -247,7 +247,7 @@
 										</v-data-table>
 									</v-card>
 								</v-dialog>
-								<v-col cols="12" sm="12" md="3">
+								<v-col cols="12" sm="12" md="3" v-if="<?=$role?>==2">
                                     <v-card @click="listDosenDialog = !listDosenDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
 											<div>
@@ -284,7 +284,7 @@
 										></v-data-table>
 									</v-card>
 								</v-dialog>
-								<v-col cols="12" sm="12" md="3">
+								<v-col cols="12" sm="12" md="3" v-if="<?=$role?>==2">
                                     <v-card @click="createBeritaAcaraDialog = !createBeritaAcaraDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
 											<div>
@@ -407,7 +407,7 @@
 										</v-card-actions>
 									</v-card>
 								</v-dialog>
-								<v-col cols="12" sm="12" md="3">
+								<v-col cols="12" sm="12" md="3" v-if="<?=$role?>==2">
                                     <v-card @click="listBeritaAcaraDialog = !listBeritaAcaraDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
 											<div>
