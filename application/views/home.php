@@ -408,7 +408,7 @@
 									</v-card>
 								</v-dialog>
 								<v-col cols="12" sm="12" md="3">
-                                    <v-card @click="" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
+                                    <v-card @click="listBeritaAcaraDialog = !listBeritaAcaraDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
 											<div>
 												<v-card-title class="font-weight-light">LIST BERITA ACARA</v-card-title>
@@ -420,6 +420,30 @@
 										<v-card-title class="justify-center"><v-icon class="display-4">mdi-note-text</v-icon></v-card-title>
                                     </v-card>
                                 </v-col>
+								<v-dialog v-model="listBeritaAcaraDialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+									<v-card>
+										<v-toolbar dense flat color="blue">
+											<span class="title font-weight-light">List Dosen</span>
+											<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
+										</v-toolbar>
+										<v-col cols="12">
+											<v-text-field
+												placeholder="Cari Nama Mahasiswa / NIM"
+												:solo='true'
+												:clearable='true'
+												append-icon="mdi-magnify"
+												class="font-regular font-weight-light mt-2 mb-n4"
+												v-model="searchBeritaAcara"
+											/>
+										</v-col>
+										<v-data-table
+											:headers='beritaAcaraHeader'
+											:items='beritaAcaras'
+											:mobile-breakpoint="1"
+											:search="searchBeritaAcara"
+										></v-data-table>
+									</v-card>
+								</v-dialog>
                             </v-row>
                         </v-container>
                     </v-layout>
@@ -461,19 +485,22 @@
 						createNewUserDialog: false,
 						listMahasiswaDialog: false,
 						listDosenDialog: false,
+						listBeritaAcaraDialog: false,
 						createBeritaAcaraDialog: false,
 						showDatePicker: false,
 						showTimePicker: false,
 						users: [],
 						listDosen: [],
 						listMahasiswa: [],
+						beritaAcaras: [],
 						user: {
 							id:null,
 							nomor:'',
 							nama:'',
 							role:'',
 							id_dosen_pembimbing:null,
-							dosen_penguji:[]
+							id_ketua_penguji:null,
+							id_dosen_penguji:null
 						},
 						userDefault: {
 							id:null,
@@ -497,6 +524,7 @@
 						dosenPembimbingInput:'',
 						searchMahasiswa:'',
 						searchDosen:'',
+						searchBeritaAcara:'',
 						ketuaDosenPengujiInput:'',
 						dosenPengujiInput:'',
 						mahasiswaInput:'',
@@ -543,6 +571,20 @@
 										this.listDosen.push(user)
 									}
 								}
+							})
+							
+						})
+						.then(() => {
+							return new Promise((resolve, reject) => {
+								axios.get('<?= base_url()?>api/Berita_Acara')
+									.then(response => {
+										resolve(response.data)
+									}) .catch(err => {
+										if(err.response.status == 500) reject('Server Error')
+									})
+							})
+							.then((response) => {
+								this.beritaAcaras = response
 							})
 						})
 					},
@@ -615,6 +657,11 @@
 									if(this.createBeritaAcaraDialog) {
 										this.createBeritaAcaraDialog = false
 										this.beritaAcara = Object.assign({},this.beritaAcaraDefault)
+									} else {
+										if(this.listBeritaAcaraDialog) {
+											this.listBeritaAcaraDialog = false
+											this.searchBeritaAcara = ''
+										}
 									}
 								}
 							}
@@ -658,6 +705,14 @@
 						return [
 							{text:'Nama', value:'nama'},
 							{value:'role', align: ' d-none', filter: value => {return value == 1}},
+						]
+					},
+					beritaAcaraHeader() {
+						return [
+							{text:'NIM', value:'mahasiswa[0].nomor'},
+							{text:'Nama', value:'mahasiswa[0].nama'},
+							{text:'Tanggal', value:'tanggal', filter: () => true},
+							{text:'Jam', value:'time', filter: () => true}
 						]
 					},
 					formatDate() {

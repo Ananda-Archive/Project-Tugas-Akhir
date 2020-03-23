@@ -75,9 +75,18 @@ class Berita_Acara extends REST_Controller {
         $id = $this->get('id');
         if (isset($id)) {
             $result = $this->M_Berita_Acara->get_berita_acara_where($id);
+            $temp = $this->M_User->get_user_where($result[0]['id_mahasiswa']);
+            $result = array_merge($result[0],array('mahasiswa' => $temp));
             $this->response($result,REST_Controller::HTTP_OK);
         } else {
+            $index = 0;
             $result = $this->M_Berita_Acara->get_all_berita_acara();
+            foreach ($result as $row) {
+                $temp = $this->M_User->get_user_where($row['id_mahasiswa']);
+                $temp2 = array_merge($result[$index],array('mahasiswa' => $temp));
+                $result[$index] = $temp2;
+                $index++;
+            };
             $this->response($result,REST_Controller::HTTP_OK);
         }
     }
