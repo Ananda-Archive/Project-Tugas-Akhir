@@ -60,7 +60,6 @@
                                                     		:auto-select-first="true"
 															color="blue"
 															item-color="blue"
-															sug
 															:search-input.sync="dosenPembimbingInput"
 															@change="dosenPembimbingInput=''"
 															item-text="nama"
@@ -88,7 +87,6 @@
                                                     		:auto-select-first="true"
 															color="blue"
 															item-color="blue"
-															sug
 															:search-input.sync="ketuaDosenPengujiInput"
 															@change="ketuaDosenPengujiInput=''"
 															item-text="nama"
@@ -116,7 +114,6 @@
                                                     		:auto-select-first="true"
 															color="blue"
 															item-color="blue"
-															sug
 															:search-input.sync="dosenPengujiInput"
 															@change="dosenPengujiInput=''"
 															item-text="nama"
@@ -180,7 +177,17 @@
 											v-if="!popUpBreakPoint"
 											item-key="nama"
 											:search="searchMahasiswa"
-										></v-data-table>
+										>
+											<template class="pl-n4" v-slot:item.id_dosen_pembimbing="{ item }">
+												<span>{{ revealDosenPembimbing(item.id_dosen_pembimbing) }}</span>
+											</template>
+											<template class="pl-n4" v-slot:item.id_ketua_penguji="{ item }">
+												<span>{{ revealDosenPembimbing(item.id_ketua_penguji) }}</span>
+											</template>
+											<template class="pl-n4" v-slot:item.id_dosen_penguji="{ item }">
+												<span>{{ revealDosenPembimbing(item.id_dosen_penguji) }}</span>
+											</template>
+										</v-data-table>
 										<v-data-table
 											:headers='mahasiswaHeader'
 											:items='users'
@@ -220,19 +227,19 @@
 													<v-list-item two-line>
 														<v-list-item-content>
 															<v-list-item-title>Dosen Pembimbing</v-list-item-title>
-															<v-list-item-subtitle>{{ item.id_dosen_pembimbing }}</v-list-item-subtitle>
+															<v-list-item-subtitle>{{ revealDosenPembimbing(item.id_dosen_pembimbing) }}</v-list-item-subtitle>
 														</v-list-item-content>
 													</v-list-item>
 													<v-list-item two-line class="mt-n2">
 														<v-list-item-content>
 															<v-list-item-title>Ketua Dosen Penguji</v-list-item-title>
-															<v-list-item-subtitle>{{ item.id_ketua_penguji }}</v-list-item-subtitle>
+															<v-list-item-subtitle>{{ revealKetuaPenguji(item.id_ketua_penguji) }}</v-list-item-subtitle>
 														</v-list-item-content>
 													</v-list-item>
 													<v-list-item two-line class="mt-n2">
 														<v-list-item-content>
 															<v-list-item-title>Dosen Penguji 1</v-list-item-title>
-															<v-list-item-subtitle>{{ item.id_dosen_penguji }}</v-list-item-subtitle>
+															<v-list-item-subtitle>{{ revealDosenPenguji(item.id_dosen_penguji) }}</v-list-item-subtitle>
 														</v-list-item-content>
 													</v-list-item>
 												</v-card>
@@ -259,15 +266,26 @@
 											<span class="title font-weight-light">List Dosen</span>
 											<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
 										</v-toolbar>
+										<v-col cols="12">
+											<v-text-field
+												placeholder="Cari Dosen"
+												:solo='true'
+												:clearable='true'
+												append-icon="mdi-magnify"
+												class="font-regular font-weight-light mt-2 mb-n4"
+												v-model="searchDosen"
+											/>
+										</v-col>
 										<v-data-table
 											:headers='dosenHeader'
 											:items='users'
 											:mobile-breakpoint="1"
+											:search="searchDosen"
 										></v-data-table>
 									</v-card>
 								</v-dialog>
 								<v-col cols="12" sm="12" md="3">
-                                    <v-card @click="" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
+                                    <v-card @click="createBeritaAcaraDialog = !createBeritaAcaraDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
 											<div>
 												<v-card-title class="font-weight-light">BUAT BERITA ACARA</v-card-title>
@@ -279,6 +297,116 @@
 										<v-card-title class="justify-center"><v-icon class="display-4">mdi-note-plus-outline</v-icon></v-card-title>
                                     </v-card>
                                 </v-col>
+								<v-dialog v-model="createBeritaAcaraDialog" persistent max-width="700px">
+									<v-card>
+										<v-toolbar dense flat color="blue">
+											<span class="title font-weight-light">Buat Berita Acara</span>
+											<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
+										</v-toolbar>
+										<v-form ref="form" class="px-2">
+											<v-card-text>
+												<v-row>
+													<v-col cols="12">
+														<v-autocomplete
+															v-model="beritaAcara.id_mahasiswa"
+															:items="listMahasiswa"
+															label="NIM"
+															chips
+															dense
+															:solo="true"
+															:clearable="true"
+                                                    		:auto-select-first="true"
+															color="blue"
+															item-color="blue"
+															:search-input.sync="mahasiswaInput"
+															@change="mahasiswaInput=''"
+															item-text="nomor"
+															item-value="id"
+															:readonly="beritaAcara.id_mahasiswa != null"
+															@click:clear="beritaAcara.id_mahasiswa = null"
+															class="mb-n4"
+														>
+														<template v-slot:selection="data">
+															<v-chip color="transparent" class="pa-0">
+																{{data.item.nomor}}
+															</v-chip>
+														</template>
+														</v-autocomplete>
+													</v-col>
+													<v-col cols="12">
+													<v-menu
+														ref="showDatePicker"
+														v-model="showDatePicker"
+														:close-on-content-click="false"
+														transition="scale-transition"
+														offset-y
+														min-width="290px"
+													>
+														<template v-slot:activator="{ on }">
+															<v-text-field
+															color="accent"
+															label="Tanggal"
+															append-icon="mdi-calendar"
+															:value="formatDate"
+															readonly
+															v-on="on"
+															:solo="true"
+															:clearable="true"
+															@click:clear="beritaAcara.tanggal = null"
+															dense
+															class="mb-n4"
+															></v-text-field>
+														</template>
+														<v-date-picker v-model="beritaAcara.tanggal"  no-title scrollable :weekday-format="dayFormat" @change="showDatePicker = false">
+														</v-date-picker>
+													</v-menu>
+													</v-col>
+													<v-col cols="12">
+														<v-dialog
+															ref="dialog"
+															v-model="showTimePicker"
+															:return-value.sync="beritaAcara.time"
+															persistent
+															width="290px"
+															style="z-index:9999"
+														>
+															<template v-slot:activator="{ on }">
+																<v-text-field
+																:solo="true"
+																dense
+																v-model="beritaAcara.time"
+																label="Waktu"
+																append-icon="mdi-clock-outline"
+																readonly
+																v-on="on"
+																:clearable="true"
+																@click:clear="beritaAcara.time = ''"
+																></v-text-field>
+															</template>
+															<v-time-picker
+																v-if="showTimePicker"
+																v-model="beritaAcara.time"
+																full-width
+															>
+															<v-spacer></v-spacer>
+																<v-btn text color="primary" @click="showTimePicker = false">Cancel</v-btn>
+																<v-btn text color="primary" @click="$refs.dialog.save(beritaAcara.time)">OK</v-btn>
+															</v-time-picker>
+														</dialog>
+													</v-col>
+												</v-row>
+											</v-card-text>
+										</v-form>
+										<v-card-actions>
+											<v-container>
+												<v-row justify="center">
+													<v-btn class="mt-n8" color="red darken-1" text @click="close">Cancel</v-btn>
+													<v-btn class="mt-n8" color="green white--text" @click="createNewBeritaAcara">Create</v-btn>
+												</v-row>
+											</v-container>
+										</v-card-actions>
+									</v-card>
+								</v-dialog>
 								<v-col cols="12" sm="12" md="3">
                                     <v-card @click="" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
                                         <div class="d-flex flex-no-wrap justify-space-between">
@@ -333,8 +461,12 @@
 						createNewUserDialog: false,
 						listMahasiswaDialog: false,
 						listDosenDialog: false,
+						createBeritaAcaraDialog: false,
+						showDatePicker: false,
+						showTimePicker: false,
 						users: [],
 						listDosen: [],
+						listMahasiswa: [],
 						user: {
 							id:null,
 							nomor:'',
@@ -352,10 +484,22 @@
 							id_ketua_penguji:null,
 							id_dosen_penguji:null
 						},
+						beritaAcara: {
+							tanggal:'',
+							time:'',
+							id_mahasiswa:null
+						},
+						beritaAcaraDefault: {
+							tanggal:'',
+							time:'',
+							id_mahasiswa:null
+						},
 						dosenPembimbingInput:'',
 						searchMahasiswa:'',
+						searchDosen:'',
 						ketuaDosenPengujiInput:'',
 						dosenPengujiInput:'',
+						mahasiswaInput:'',
 						listRole: [
 							{id:0, value:'Mahasiswa'},
 							{id:1, value:'Dosen Penguji'},
@@ -391,18 +535,14 @@
 						})
 						.then((response) => {
 							this.users = response
-						})
-						.then(() => {
-							return new Promise((resolve, reject) => {
-								axios.get('<?= base_url()?>api/Dosen')
-									.then(response => {
-										resolve(response.data)
-									}) .catch(err => {
-										if(err.response.status == 500) reject('Server Error')
-									})
-							})
-							.then((response) => {
-								this.listDosen = response
+							response.forEach(user => {
+								if(user.role == 0) {
+									this.listMahasiswa.push(user)
+								} else {
+									if(user.role == 1) {
+										this.listDosen.push(user)
+									}
+								}
 							})
 						})
 					},
@@ -412,7 +552,7 @@
 								.then(response => {
 									resolve(response.data)
 								}) .catch(err => {
-									if(err.response.status == 500) reject('Server Error')
+									if(err.response.status == 500) reject(err.response.data)
 									if(err.response.status == 401) reject(err.response.data)
 								})
 						})
@@ -421,7 +561,7 @@
 							this.snackBarColor = 'success'
 						}) .catch(err => {
 							if(err.message == "NIM / NIP already exists.") {
-								this.errorMessage = err.message
+								this.snackBarMessage = err.message
 								this.snackBarColor = 'warning'
 							} else {
 								this.snackBarMessage = err
@@ -435,11 +575,65 @@
 							this.close()
 						})
 					},
+					createNewBeritaAcara() {
+						return new Promise((resolve, reject) => {
+							axios.post('<?= base_url()?>api/Berita_Acara',this.beritaAcara)
+								.then(response => {
+									resolve(response.data)
+								}) .catch(err => {
+									if(err.response.status == 500) reject('Server Error')
+									if(err.response.status == 401) reject(err.response.data)
+								})
+						})
+						.then((response) => {
+							this.snackBarMessage = response.message
+							this.snackBarColor = 'success'
+						}) .catch(err => {
+							this.snackBarMessage = err
+							this.snackBarColor = 'error'
+							this.snackBar = true
+						}) .finally(() => {
+							this.snackBar = true
+							this.get()
+							this.beritaAcara = Object.assign({},this.beritaAcaraDefault)
+							this.close()
+						})
+					},
 					close() {
 						if(this.createNewUserDialog) {
 							this.createNewUserDialog = false
+							this.user = Object.assign({},this.userDefault)
+						} else {
+							if(this.listMahasiswaDialog) {
+								this.listMahasiswaDialog = false
+								this.searchMahasiswa = ''
+							} else {
+								if(this.listDosenDialog) {
+									this.listDosenDialog = false
+									this.searchDosen = ''
+								} else {
+									if(this.createBeritaAcaraDialog) {
+										this.createBeritaAcaraDialog = false
+										this.beritaAcara = Object.assign({},this.beritaAcaraDefault)
+									}
+								}
+							}
 						}
-					}
+					},
+					revealDosenPembimbing(id) {
+						return _.find(this.users,['id',id]).nama
+					},
+					revealKetuaPenguji(id) {
+						return _.find(this.users,['id',id]).nama
+					},
+					revealDosenPenguji(id) {
+						return _.find(this.users,['id',id]).nama
+					},
+					dayFormat(date) {
+						let i = new Date(date).getDay(date)
+						var dayOftheWeek = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+						return dayOftheWeek[i]
+					},
 				},
 				
 				computed: {
@@ -465,8 +659,17 @@
 							{text:'Nama', value:'nama'},
 							{value:'role', align: ' d-none', filter: value => {return value == 1}},
 						]
-					}
+					},
+					formatDate() {
+						return this.beritaAcara.tanggal ? moment(this.beritaAcara.tanggal).format('DD MMMM YYYY') : ''
+					},
 				},
+
+				watch: {
+					createNewUserDialog() {
+						this.$refs.form.resetValidation()
+					},
+				}
 
 			})
 		</script>
