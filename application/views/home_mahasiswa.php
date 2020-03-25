@@ -18,7 +18,7 @@
                         <v-container fluid>
                             <v-row align="center" justify="center">
 								<v-col cols="12" sm="12" md="12">
-                                    <v-row justify="center"><span class="display-2 mt-n4"><?=$nama?></span></v-row>
+                                    <v-row justify="center"><span class="display-2 text-center mt-n4"><?=$nama?></span></v-row>
                                 </v-col>
 								<v-col cols="12" sm="12" md="12">
                                     <v-row justify="center"><span class="body-2 font-weight-thin mt-n4 mb-n4"><?=$nomor?></span></v-row>
@@ -86,7 +86,7 @@
 											<v-container>
 												<v-row justify="center">
 													<v-btn class="mt-n8" color="red darken-1" text @click="close">Cancel</v-btn>
-													<v-btn class="mt-n8" :disabled="files[0].status_dosen_pembimbing == 0 && files[0].status_ketua_penguji == 0 && files[0].status_dosen_penguji == 0" color="green white--text" @click="uploadBerkasBaru">Upload</v-btn>
+													<v-btn class="mt-n8" :disabled="files.length != 0 && files[0].status_dosen_pembimbing == 0 && files[0].status_ketua_penguji == 0 && files[0].status_dosen_penguji == 0" color="green white--text" @click="uploadBerkasBaru">Upload</v-btn>
 												</v-row>
 											</v-container>
 										</v-card-actions>

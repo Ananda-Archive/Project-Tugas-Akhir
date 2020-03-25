@@ -136,14 +136,7 @@
                                 }
                             }) .finally(() => {
                                 if(this.logInstatus) {
-                                    let role = '<?= $this->session->userdata('role'); ?>'
-                                    if(role==2) {
-                                        window.location.href = '<?=base_url('home/admin');?>'
-                                    } else {
-                                        if(role==0) {
-                                            window.location.href = '<?=base_url('home/mahasiswa');?>'
-                                        }
-                                    }
+                                    window.location.href = '<?=base_url('Home');?>'
                                 } else {
                                     this.loading = false
                                 }

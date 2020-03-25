@@ -37,7 +37,7 @@ class M_Berkas extends CI_Model{
     }
     
     public function get_specific_berkas_where_mahasiswa($id_mahasiswa) {
-        $this->db->select('id,file,revisi,status_dosen_pembimbing,status_ketua_penguji,status_dosen_penguji,tanggal');
+        $this->db->select('id,file,revisi_dosen_pembimbing,revisi_ketua_penguji,revisi_dosen_penguji,status_dosen_pembimbing,status_ketua_penguji,status_dosen_penguji,tanggal');
         $this->db->from($this::TABLE_NAME);
         $this->db->where("id_mahasiswa='{$id_mahasiswa}'");
         $this->db->order_by('tanggal', 'DESC');
