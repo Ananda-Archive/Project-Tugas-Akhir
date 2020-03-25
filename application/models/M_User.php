@@ -72,4 +72,24 @@ class M_User extends CI_Model{
         $query->num_rows() > 0 ? true : false;
     }
     
+    public function get_berkas_where_dosen_pembimbing($id_dosen_pembimbing) {
+        $this->db->select('*');
+        $this->db->from($this::TABLE_NAME);
+        $this->db->where("id_dosen_pembimbing='{$id_dosen_pembimbing}'");
+        return $this->db->get()->result_array();
+    }
+
+    public function get_berkas_where_ketua_penguji($id_ketua_penguji) {
+        $this->db->select('*');
+        $this->db->from($this::TABLE_NAME);
+        $this->db->where("id_ketua_penguji='{$id_ketua_penguji}'");
+        return $this->db->get()->result_array();
+    }
+
+    public function get_berkas_where_dosen_penguji($id_dosen_penguji) {
+        $this->db->select('*');
+        $this->db->from($this::TABLE_NAME);
+        $this->db->where("id_dosen_penguji='{$id_dosen_penguji}'");
+        return $this->db->get()->result_array();
+    }
 }

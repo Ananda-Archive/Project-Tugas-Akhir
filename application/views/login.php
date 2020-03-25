@@ -136,11 +136,12 @@
                                 }
                             }) .finally(() => {
                                 if(this.logInstatus) {
-                                    if(<?=$role?>==2) {
-                                        window.location.href = '<?=base_url('home');?>'
+                                    let role = '<?= $this->session->userdata('role'); ?>'
+                                    if(role==2) {
+                                        window.location.href = '<?=base_url('home/admin');?>'
                                     } else {
-                                        if(<?=$role?>==0) {
-                                            window.location.href = '<?=base_url('home_mahasiswa');?>'
+                                        if(role==0) {
+                                            window.location.href = '<?=base_url('home/mahasiswa');?>'
                                         }
                                     }
                                 } else {

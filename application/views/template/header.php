@@ -17,3 +17,4 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 		<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
 		<!-- moment.js -->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+		<!-- <script>Vue.config.devtools = false</script> -->
