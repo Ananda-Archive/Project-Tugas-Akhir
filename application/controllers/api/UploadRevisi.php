@@ -19,7 +19,7 @@ class UploadRevisi extends REST_Controller {
         }
     }
 
-
+// SAYA MENGGUNAKAN POST BUKAN PUT KARENA PUT TIDAK BISA MENANGKAP PARAMETER DATA FORM TIDAK TAHU KENAPA, JADI SAYA DELETE DATA BARU INSERT DATA LAGI
     public function index_post(){
         /*
         id
