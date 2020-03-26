@@ -21,10 +21,9 @@ class User extends REST_Controller {
 
 
     public function index_post(){
-            
                 $nomor = $this->post('nomor');
                 $nama = $this->post('nama');
-                $password = $this->post('nomor');
+                $password = hash('sha512',$this->post('nomor') . config_item('encryption_key'));
                 $role = $this->post('role');
                 $dosen_penguji = $this->post('dosen_penguji');
                 $id_dosen_pembimbing = $this->post('id_dosen_pembimbing');
