@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 26, 2020 at 07:29 PM
+-- Generation Time: Mar 27, 2020 at 12:52 AM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.1
 
@@ -70,25 +70,13 @@ CREATE TABLE `user` (
   `id` int(11) NOT NULL,
   `nomor` varchar(20) NOT NULL,
   `nama` varchar(50) NOT NULL,
-  `password` varchar(20) NOT NULL,
+  `password` text NOT NULL,
   `profile_picture` varchar(100) NOT NULL,
   `role` tinyint(4) NOT NULL DEFAULT 0,
   `id_dosen_pembimbing` int(11) DEFAULT NULL,
   `id_ketua_penguji` int(11) DEFAULT NULL,
   `id_dosen_penguji` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `user`
---
-
-INSERT INTO `user` (`id`, `nomor`, `nama`, `password`, `profile_picture`, `role`, `id_dosen_pembimbing`, `id_ketua_penguji`, `id_dosen_penguji`) VALUES
-(3, '999', 'admin', '999', '', 2, NULL, NULL, NULL),
-(4, '198104212008121002', 'Panji Wisnu Wirawan, ST, M.T', '198104212008121002', '', 1, NULL, NULL, NULL),
-(5, '198104202005012001', 'Dr. Retno Kusumaningrum, S.Si, M.Kom', '198104202005012001', '', 1, NULL, NULL, NULL),
-(6, '198203092006041002', 'Dr. Eng. Adi Wibowo, S.Si, M.Kom', '198203092006041002', '', 1, NULL, NULL, NULL),
-(7, '198511252018032001', 'Rismiyati, B.Eng, M.Cs', '198511252018032001', '', 1, NULL, NULL, NULL),
-(8, '197404011999031002', 'Dr. Aris Puji Widodo, S.Si, M.T', '197404011999031002', '', 1, NULL, NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -143,7 +131,7 @@ ALTER TABLE `berkas`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
