@@ -58,8 +58,7 @@
 															v-model="file"
 															color="blue"
 															label="File input"
-															multiple
-															placeholder="Select your files"
+															placeholder="Select your file"
 															prepend-icon="mdi-paperclip"
 															outlined
 															:rules="fileRule"
