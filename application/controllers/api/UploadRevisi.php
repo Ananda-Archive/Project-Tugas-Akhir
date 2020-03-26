@@ -80,7 +80,7 @@ class UploadRevisi extends REST_Controller {
         $tempfilename = $_FILES['file']['tmp_name'];
         $dir = './assets/berkas/';
         if(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION) == 'pdf' || pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION) == 'docx' || pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION) == 'doc' || pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION) == 'zip' || pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION) == 'rar') {
-            if(6 == $id_dosen_pembimbing) {
+            if($this->session->userdata('id') == $id_dosen_pembimbing) {
                 if($this->M_Berkas->delete($id)) {
                     if($this->M_Berkas->store_revisi_pembimbing($id_mahasiswa, $id_dosen_pembimbing, $id_ketua_penguji, $id_dosen_penguji, $file_mahasiswa, base_url('assets/berkas/').$filename, $revisi_ketua_penguji, $revisi_dosen_penguji, $status_ketua_penguji, $status_dosen_penguji)) {
                         $moveToDir = move_uploaded_file($tempfilename, $dir.$filename);
@@ -107,13 +107,63 @@ class UploadRevisi extends REST_Controller {
                     );
                 }
             } else {
-                $this->response(
-                    array(
-                        'status' => FALSE,
-                        'message' => 'hwehwe'
-                    ),REST_Controller::HTTP_INTERNAL_SERVER_ERROR
-                );
+                if($this->session->userdata('id') == $id_ketua_penguji) {
+                    if($this->M_Berkas->delete($id)) {
+                        if($this->M_Berkas->store_revisi_ketua($id_mahasiswa, $id_dosen_pembimbing, $id_ketua_penguji, $id_dosen_penguji, $file_mahasiswa, $revisi_dosen_pembimbing, base_url('assets/berkas/').$filename, $revisi_dosen_penguji, $status_dosen_pembimbing, $status_dosen_penguji)) {
+                            $moveToDir = move_uploaded_file($tempfilename, $dir.$filename);
+                            $this->response(
+                                array(
+                                    'status' => TRUE,
+                                    'message' => $this::UPDATE_SUCCESS_MESSSAGE
+                                ), REST_Controller::HTTP_OK
+                            );
+                        } else {
+                            $this->response(
+                                array(
+                                    'status' => FALSE,
+                                    'message' => $this::UPDATE_FAILED_MESSAGE
+                                ),REST_Controller::HTTP_INTERNAL_SERVER_ERROR
+                            );
+                        }
+                    } else {
+                        $this->response(
+                            array(
+                                'status' => FALSE,
+                                'message' => $this::UPDATE_FAILED_MESSAGE
+                            ),REST_Controller::HTTP_INTERNAL_SERVER_ERROR
+                        );
+                    }
+                } else {
+                    if($this->session->userdata('id') == $id_dosen_penguji) {
+                        if($this->M_Berkas->delete($id)) {
+                            if($this->M_Berkas->store_revisi_penguji($id_mahasiswa, $id_dosen_pembimbing, $id_ketua_penguji, $id_dosen_penguji, $file_mahasiswa, $revisi_dosen_pembimbing, $revisi_ketua_penguji, base_url('assets/berkas/').$filename, $status_dosen_pembimbing, $status_ketua_penguji)) {
+                                $moveToDir = move_uploaded_file($tempfilename, $dir.$filename);
+                                $this->response(
+                                    array(
+                                        'status' => TRUE,
+                                        'message' => $this::UPDATE_SUCCESS_MESSSAGE
+                                    ), REST_Controller::HTTP_OK
+                                );
+                            } else {
+                                $this->response(
+                                    array(
+                                        'status' => FALSE,
+                                        'message' => $this::UPDATE_FAILED_MESSAGE
+                                    ),REST_Controller::HTTP_INTERNAL_SERVER_ERROR
+                                );
+                            }
+                        }
+                    }
+                }
             }
+        } else {
+            $this->response(
+                array(
+                    'status' => FALSE,
+                    'message' => 'ONLY ACCEPT ZIP / RAR / DOC / DOCX / ZIP FILE TYPE'
+                ),
+                REST_Controller::HTTP_UNAUTHORIZED
+            );
         }
 
     }
@@ -125,9 +175,25 @@ class UploadRevisi extends REST_Controller {
         $id_ketua_penguji = $this->put('id_ketua_penguji');
         $id_dosen_penguji = $this->put('id_dosen_penguji');
         $id_dosen = $this->put('id_dosen');
-        if($status_revisi == 1) {
-            if($id_dosen == $id_dosen_pembimbing) {
-                if($this->M_Berkas->update_lolos_pembimbing($id)) {
+        if($this->session->userdata('id') == $id_dosen_pembimbing) {
+            if($this->M_Berkas->update_lolos_pembimbing($id)) {
+                $this->response(
+                    array(
+                        'status' => TRUE,
+                        'message' => $this::UPDATE_SUCCESS_MESSSAGE
+                    ), REST_Controller::HTTP_OK
+                );
+            } else {
+                $this->response(
+                    array(
+                        'status' => FALSE,
+                        'message' => $this::UPDATE_FAILED_MESSAGE
+                    ),REST_Controller::HTTP_INTERNAL_SERVER_ERROR
+                );
+            }
+        } else {
+            if($this->session->userdata('id') == $id_ketua_penguji) {
+                if($this->M_Berkas->update_lolos_ketua($id)) {
                     $this->response(
                         array(
                             'status' => TRUE,
@@ -143,8 +209,8 @@ class UploadRevisi extends REST_Controller {
                     );
                 }
             } else {
-                if($id_dosen == $id_ketua_penguji) {
-                    if($this->M_Berkas->update_lolos_ketua($id)) {
+                if($this->session->userdata('id') == $id_dosen_penguji) {
+                    if($this->M_Berkas->update_lolos_penguji($id)) {
                         $this->response(
                             array(
                                 'status' => TRUE,

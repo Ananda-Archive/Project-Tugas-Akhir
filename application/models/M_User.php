@@ -92,4 +92,11 @@ class M_User extends CI_Model{
         $this->db->where("id_dosen_penguji='{$id_dosen_penguji}'");
         return $this->db->get()->result_array();
     }
+
+    public function get_nama_nim_mahasiswa($id_mahasiswa) {
+        $this->db->select('nomor,nama');
+        $this->db->from($this::TABLE_NAME);
+        $this->db->where("id='{$id_mahasiswa}'");
+        return $this->db->get()->result_array();
+    }
 }

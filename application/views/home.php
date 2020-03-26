@@ -309,7 +309,7 @@
 													<v-col cols="12">
 														<v-autocomplete
 															v-model="beritaAcara.id_mahasiswa"
-															:items="listMahasiswa"
+															:items="listMahasiswaReady"
 															label="NIM"
 															chips
 															dense
@@ -325,6 +325,7 @@
 															:readonly="beritaAcara.id_mahasiswa != null"
 															@click:clear="beritaAcara.id_mahasiswa = null"
 															class="mb-n4"
+															:rules="rules.nomor"
 														>
 														<template v-slot:selection="data">
 															<v-chip color="transparent" class="pa-0">
@@ -355,6 +356,7 @@
 															@click:clear="beritaAcara.tanggal = null"
 															dense
 															class="mb-n4"
+															:rules="rules.date"
 															></v-text-field>
 														</template>
 														<v-date-picker v-model="beritaAcara.tanggal"  no-title scrollable :weekday-format="dayFormat" @change="showDatePicker = false">
@@ -381,6 +383,7 @@
 																v-on="on"
 																:clearable="true"
 																@click:clear="beritaAcara.time = ''"
+																:rules="rules.time"
 																></v-text-field>
 															</template>
 															<v-time-picker
@@ -441,7 +444,18 @@
 											:items='beritaAcaras'
 											:mobile-breakpoint="1"
 											:search="searchBeritaAcara"
-										></v-data-table>
+										>
+											<template v-slot:item.tanggal="{ item }">
+												<div v-if="item.length != 0">
+													<span>{{formatDates(item.tanggal)}}</span>
+												</div>
+											</template>
+											<template v-slot:item.time="{ item }">
+												<div v-if="item.length != 0">
+													<span>{{formatTime(item.time)}}</span>
+												</div>
+											</template>
+										</v-data-table>
 									</v-card>
 								</v-dialog>
                             </v-row>
@@ -492,6 +506,7 @@
 						users: [],
 						listDosen: [],
 						listMahasiswa: [],
+						listMahasiswaReady: [],
 						beritaAcaras: [],
 						user: {
 							id:null,
@@ -530,7 +545,7 @@
 						mahasiswaInput:'',
 						listRole: [
 							{id:0, value:'Mahasiswa'},
-							{id:1, value:'Dosen Penguji'},
+							{id:1, value:'Dosen'},
 							{id:2, value:'Admin'}
 						],
 						rules: {
@@ -540,6 +555,12 @@
 							],
 							nama: [
 								v => !!v || 'Nama Wajib diisi',
+							],
+							date: [
+								v => !!v || 'Tanggal Wajib Diisi',
+							],
+							time: [
+								v => !!v || 'Jam Wajib diisi',
 							]
 						},
 						snackBar: false,
@@ -551,6 +572,12 @@
 				methods: {
                     logOut() {
                         window.location.href = '<?=base_url('home/logOut');?>'
+                    },
+                    formatDates(item) {
+						return item ? moment(item).format('DD MMMM YYYY') : ''
+					},
+                    formatTime(item) {
+                        return item ? moment(item, 'h:mm:ss').format('LT') : ''
                     },
 					get() {
 						return new Promise((resolve, reject) => {
@@ -566,6 +593,9 @@
 							response.forEach(user => {
 								if(user.role == 0) {
 									this.listMahasiswa.push(user)
+									if(user.berkas.length > 0) {
+										this.listMahasiswaReady.push(user)
+									}
 								} else {
 									if(user.role == 1) {
 										this.listDosen.push(user)
@@ -589,57 +619,61 @@
 						})
 					},
 					createNewUser() {
-						return new Promise((resolve, reject) => {
-							axios.post('<?= base_url()?>api/User',this.user)
-								.then(response => {
-									resolve(response.data)
-								}) .catch(err => {
-									if(err.response.status == 500) reject(err.response.data)
-									if(err.response.status == 401) reject(err.response.data)
-								})
-						})
-						.then((response) => {
-							this.snackBarMessage = response.message
-							this.snackBarColor = 'success'
-						}) .catch(err => {
-							if(err.message == "NIM / NIP already exists.") {
-								this.snackBarMessage = err.message
-								this.snackBarColor = 'warning'
-							} else {
+						if(this.$refs.form.validate()) {
+							return new Promise((resolve, reject) => {
+								axios.post('<?= base_url()?>api/User',this.user)
+									.then(response => {
+										resolve(response.data)
+									}) .catch(err => {
+										if(err.response.status == 500) reject(err.response.data)
+										if(err.response.status == 401) reject(err.response.data)
+									})
+							})
+							.then((response) => {
+								this.snackBarMessage = response.message
+								this.snackBarColor = 'success'
+							}) .catch(err => {
+								if(err.message == "NIM / NIP already exists.") {
+									this.snackBarMessage = err.message
+									this.snackBarColor = 'warning'
+								} else {
+									this.snackBarMessage = err
+									this.snackBarColor = 'error'
+									this.snackBar = true
+								}
+							}) .finally(() => {
+								this.snackBar = true
+								this.get()
+								this.user = Object.assign({},this.userDefault)
+								this.close()
+							})
+						}
+					},
+					createNewBeritaAcara() {
+						if(this.$refs.form.validate()) {
+							return new Promise((resolve, reject) => {
+								axios.post('<?= base_url()?>api/Berita_Acara',this.beritaAcara)
+									.then(response => {
+										resolve(response.data)
+									}) .catch(err => {
+										if(err.response.status == 500) reject('Server Error')
+										if(err.response.status == 401) reject(err.response.data)
+									})
+							})
+							.then((response) => {
+								this.snackBarMessage = response.message
+								this.snackBarColor = 'success'
+							}) .catch(err => {
 								this.snackBarMessage = err
 								this.snackBarColor = 'error'
 								this.snackBar = true
-							}
-						}) .finally(() => {
-							this.snackBar = true
-							this.get()
-							this.user = Object.assign({},this.userDefault)
-							this.close()
-						})
-					},
-					createNewBeritaAcara() {
-						return new Promise((resolve, reject) => {
-							axios.post('<?= base_url()?>api/Berita_Acara',this.beritaAcara)
-								.then(response => {
-									resolve(response.data)
-								}) .catch(err => {
-									if(err.response.status == 500) reject('Server Error')
-									if(err.response.status == 401) reject(err.response.data)
-								})
-						})
-						.then((response) => {
-							this.snackBarMessage = response.message
-							this.snackBarColor = 'success'
-						}) .catch(err => {
-							this.snackBarMessage = err
-							this.snackBarColor = 'error'
-							this.snackBar = true
-						}) .finally(() => {
-							this.snackBar = true
-							this.get()
-							this.beritaAcara = Object.assign({},this.beritaAcaraDefault)
-							this.close()
-						})
+							}) .finally(() => {
+								this.snackBar = true
+								this.get()
+								this.beritaAcara = Object.assign({},this.beritaAcaraDefault)
+								this.close()
+							})
+						}
 					},
 					close() {
 						if(this.createNewUserDialog) {
@@ -724,6 +758,10 @@
 					createNewUserDialog() {
 						this.$refs.form.resetValidation()
 					},
+					createBeritaAcaraDialog() {
+						this.$refs.form.resetValidation()
+					}
+					
 				}
 
 			})

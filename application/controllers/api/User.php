@@ -103,7 +103,14 @@ class User extends REST_Controller {
             $result = $this->M_User->get_user_where($id);
             $this->response($result,REST_Controller::HTTP_OK);
         } else {
+            $idx = 0;
             $result = $this->M_User->get_all_user();
+            foreach($result as $row) {
+                $berkas = $this->M_Berkas->get_berkas_where_mahasiswa($row['id']);
+                $temp = array_merge($result[$idx], array('berkas' => $berkas));
+                $result[$idx] = $temp;
+                $idx++;
+            }
             $this->response($result,REST_Controller::HTTP_OK);
         }
     }

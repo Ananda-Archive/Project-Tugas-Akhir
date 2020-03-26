@@ -71,6 +71,42 @@ class M_Berkas extends CI_Model{
         return $this->db->insert_id();
     }
 
+    public function store_revisi_ketua($id_mahasiswa, $id_dosen_pembimbing, $id_ketua_penguji, $id_dosen_penguji, $file, $revisi_dosen_pembimbing, $revisi_ketua_penguji, $revisi_dosen_penguji, $status_dosen_pembimbing, $status_dosen_penguji) {
+        $this->db->insert($this::TABLE_NAME, array(
+            'id_mahasiswa' => $id_mahasiswa,
+            'id_dosen_pembimbing' => $id_dosen_pembimbing,
+            'id_ketua_penguji' => $id_ketua_penguji,
+            'id_dosen_penguji' => $id_dosen_penguji,
+            'file' => $file,
+            'revisi_dosen_pembimbing' => $revisi_dosen_pembimbing,
+            'revisi_ketua_penguji' => $revisi_ketua_penguji,
+            'revisi_dosen_penguji' => $revisi_dosen_penguji,
+            'status_dosen_pembimbing' => $status_dosen_pembimbing,
+            'status_ketua_penguji' => 2,
+            'status_dosen_penguji' => $status_dosen_penguji
+
+        ));
+        return $this->db->insert_id();
+    }
+
+    public function store_revisi_penguji($id_mahasiswa, $id_dosen_pembimbing, $id_ketua_penguji, $id_dosen_penguji, $file, $revisi_dosen_pembimbing, $revisi_ketua_penguji, $revisi_dosen_penguji, $status_dosen_pembimbing, $status_ketua_penguji) {
+        $this->db->insert($this::TABLE_NAME, array(
+            'id_mahasiswa' => $id_mahasiswa,
+            'id_dosen_pembimbing' => $id_dosen_pembimbing,
+            'id_ketua_penguji' => $id_ketua_penguji,
+            'id_dosen_penguji' => $id_dosen_penguji,
+            'file' => $file,
+            'revisi_dosen_pembimbing' => $revisi_dosen_pembimbing,
+            'revisi_ketua_penguji' => $revisi_ketua_penguji,
+            'revisi_dosen_penguji' => $revisi_dosen_penguji,
+            'status_dosen_pembimbing' => $status_dosen_pembimbing,
+            'status_ketua_penguji' => $status_ketua_penguji,
+            'status_dosen_penguji' => 2
+
+        ));
+        return $this->db->insert_id();
+    }
+
     public function update_lolos_pembimbing($id) {
         $this->db->update($this::TABLE_NAME, array(
             'status_dosen_pembimbing' => 1

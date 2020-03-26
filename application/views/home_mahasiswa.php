@@ -144,6 +144,43 @@
 										</v-card-text>
 									</v-card>
 								</v-dialog>
+								<v-col cols="12" sm="12" md="3" v-if="beritaAcara.length != 0">
+                                    <v-card @click="viewBeritaAcaraDialog = !viewBeritaAcaraDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
+                                        <div class="d-flex flex-no-wrap justify-space-between">
+											<div>
+												<v-card-title class="font-weight-light">BERITA ACARA</v-card-title>
+											</div>
+											<div>
+												<v-card-title class="font-weight-light"><v-icon>mdi-note-multiple-outline</v-icon></v-card-title>
+											</div>
+										</div>
+										<v-card-title class="justify-center"><v-icon class="display-4">mdi-note-text</v-icon></v-card-title>
+                                    </v-card>
+                                </v-col>
+								<v-dialog v-model="viewBeritaAcaraDialog" persistent max-width="700px">
+									<v-card>
+										<v-toolbar dense flat color="blue">
+											<span class="title font-weight-light">Berita Acara</span>
+											<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
+										</v-toolbar>
+										<v-card-text>
+											<v-simple-table class="mt-4">
+												<template v-slot:default>
+													<tbody>
+														<tr>
+															<td>Tanggal</td>
+															<td>{{formatDate(beritaAcara[0].tanggal)}}</td>
+														</tr>
+														<tr>
+															<td>Jam</td>
+															<td>{{formatTime(beritaAcara[0].time)}}</td>
+														</tr>
+													</tbody>
+												</template>
+											</v-simple-table>
+										</v-card-text>
+									</v-card>
+								</v-dialog>
 							</v-row>
 						</v-container>
 					</v-layout>
@@ -185,8 +222,10 @@
                         snackBarMessage: '',
 						uploadNewBerkasDialog: false,
 						viewStatusBerkas: false,
+						viewBeritaAcaraDialog: false,
 						files: [],
 						users: [],
+						beritaAcara: [],
 						file:'',
 						test: '',
 						fileRule: [
@@ -224,7 +263,26 @@
 								this.users = response
 							})
 						})
+						.then(() => {
+                            return new Promise((resolve, reject) => {
+                                axios.get('<?= base_url()?>api/Berita_Acara',{params: {id: <?=$id?>}})
+                                    .then(response => {
+                                        resolve(response.data)
+                                    }) .catch(err => {
+                                        if(err.response.status == 500) reject('Server Error')
+                                    })
+                            })
+                            .then((response) => {
+                                this.beritaAcara = response
+                            })
+                        })
 					},
+					formatDate(item) {
+						return item ? moment(item).format('DD MMMM YYYY') : ''
+					},
+                    formatTime(item) {
+                        return item ? moment(item, 'h:mm:ss').format('LT') : ''
+                    },
 					revealDosenPembimbing(id) {
 						return _.find(this.users,['id',id]).nama
 					},
@@ -250,13 +308,17 @@
 						} else {
 							if(this.viewStatusBerkas) {
 								this.viewStatusBerkas = false
+							} else {
+								if(this.viewBeritaAcaraDialog) {
+									this.viewBeritaAcaraDialog = false
+								}
 							}
 						}
 					},
 					uploadBerkasBaru() {
 						if(this.$refs.form.validate()) {
 							const data = new FormData()
-							data.append('file',this.file[0])
+							data.append('file',this.file)
 							return new Promise((resolve, reject) => {
 								axios.post('<?= base_url()?>api/Berkas',data,{headers: {'Content-Type': 'multipart/form-data'}})
 									.then(response => {

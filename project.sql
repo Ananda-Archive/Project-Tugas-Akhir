@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 22, 2020 at 05:17 AM
+-- Generation Time: Mar 26, 2020 at 07:29 PM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.1
 
@@ -25,12 +25,39 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `time`
+-- Table structure for table `berita_acara`
 --
 
-CREATE TABLE `time` (
-  `time_start` timestamp NOT NULL DEFAULT current_timestamp(),
-  `time_end` timestamp NOT NULL DEFAULT current_timestamp()
+CREATE TABLE `berita_acara` (
+  `id` int(11) NOT NULL,
+  `id_mahasiswa` int(11) DEFAULT NULL,
+  `id_dosen_pembimbing` int(11) DEFAULT NULL,
+  `id_ketua_penguji` int(11) DEFAULT NULL,
+  `id_dosen_penguji` int(11) DEFAULT NULL,
+  `tanggal` date NOT NULL DEFAULT current_timestamp(),
+  `time` time NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `berkas`
+--
+
+CREATE TABLE `berkas` (
+  `id` int(11) NOT NULL,
+  `id_mahasiswa` int(11) DEFAULT NULL,
+  `id_dosen_pembimbing` int(11) DEFAULT NULL,
+  `id_ketua_penguji` int(11) DEFAULT NULL,
+  `id_dosen_penguji` int(11) DEFAULT NULL,
+  `file` varchar(100) NOT NULL,
+  `revisi_dosen_pembimbing` varchar(100) DEFAULT NULL,
+  `revisi_ketua_penguji` varchar(100) DEFAULT NULL,
+  `revisi_dosen_penguji` varchar(100) DEFAULT NULL,
+  `status_dosen_pembimbing` int(11) NOT NULL DEFAULT 0,
+  `status_ketua_penguji` int(11) NOT NULL DEFAULT 0,
+  `status_dosen_penguji` int(11) NOT NULL DEFAULT 0,
+  `tanggal` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -46,46 +73,107 @@ CREATE TABLE `user` (
   `password` varchar(20) NOT NULL,
   `profile_picture` varchar(100) NOT NULL,
   `role` tinyint(4) NOT NULL DEFAULT 0,
-  `dosen_pembimbing` int(11) DEFAULT NULL
+  `id_dosen_pembimbing` int(11) DEFAULT NULL,
+  `id_ketua_penguji` int(11) DEFAULT NULL,
+  `id_dosen_penguji` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`id`, `nomor`, `nama`, `password`, `profile_picture`, `role`, `dosen_pembimbing`) VALUES
-(1, '24060117130048', 'Ananda Prabu Tritya Vijaya', '123456', 'src/img/profile/24060117130048.jpg', 2, NULL);
+INSERT INTO `user` (`id`, `nomor`, `nama`, `password`, `profile_picture`, `role`, `id_dosen_pembimbing`, `id_ketua_penguji`, `id_dosen_penguji`) VALUES
+(3, '999', 'admin', '999', '', 2, NULL, NULL, NULL),
+(4, '198104212008121002', 'Panji Wisnu Wirawan, ST, M.T', '198104212008121002', '', 1, NULL, NULL, NULL),
+(5, '198104202005012001', 'Dr. Retno Kusumaningrum, S.Si, M.Kom', '198104202005012001', '', 1, NULL, NULL, NULL),
+(6, '198203092006041002', 'Dr. Eng. Adi Wibowo, S.Si, M.Kom', '198203092006041002', '', 1, NULL, NULL, NULL),
+(7, '198511252018032001', 'Rismiyati, B.Eng, M.Cs', '198511252018032001', '', 1, NULL, NULL, NULL),
+(8, '197404011999031002', 'Dr. Aris Puji Widodo, S.Si, M.T', '197404011999031002', '', 1, NULL, NULL, NULL);
 
 --
 -- Indexes for dumped tables
 --
 
 --
+-- Indexes for table `berita_acara`
+--
+ALTER TABLE `berita_acara`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_mahasiswa` (`id_mahasiswa`),
+  ADD KEY `id_dosen_pembimbing` (`id_dosen_pembimbing`),
+  ADD KEY `id_ketua_penguji` (`id_ketua_penguji`),
+  ADD KEY `id_dosen_penguji` (`id_dosen_penguji`);
+
+--
+-- Indexes for table `berkas`
+--
+ALTER TABLE `berkas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `berkas_ibfk_1` (`id_dosen_pembimbing`),
+  ADD KEY `berkas_ibfk_2` (`id_dosen_penguji`),
+  ADD KEY `berkas_ibfk_3` (`id_ketua_penguji`),
+  ADD KEY `id_mahasiswa` (`id_mahasiswa`);
+
+--
 -- Indexes for table `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `dosen_pembimbing` (`dosen_pembimbing`);
+  ADD KEY `id_dosen_pembimbing` (`id_dosen_pembimbing`),
+  ADD KEY `id_ketua_penguji` (`id_ketua_penguji`),
+  ADD KEY `id_dosen_penguji` (`id_dosen_penguji`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
+-- AUTO_INCREMENT for table `berita_acara`
+--
+ALTER TABLE `berita_acara`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `berkas`
+--
+ALTER TABLE `berkas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables
 --
 
 --
+-- Constraints for table `berita_acara`
+--
+ALTER TABLE `berita_acara`
+  ADD CONSTRAINT `berita_acara_ibfk_1` FOREIGN KEY (`id_mahasiswa`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `berita_acara_ibfk_2` FOREIGN KEY (`id_dosen_pembimbing`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `berita_acara_ibfk_3` FOREIGN KEY (`id_ketua_penguji`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `berita_acara_ibfk_4` FOREIGN KEY (`id_dosen_penguji`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `berkas`
+--
+ALTER TABLE `berkas`
+  ADD CONSTRAINT `berkas_ibfk_1` FOREIGN KEY (`id_dosen_pembimbing`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `berkas_ibfk_2` FOREIGN KEY (`id_dosen_penguji`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `berkas_ibfk_3` FOREIGN KEY (`id_ketua_penguji`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `berkas_ibfk_4` FOREIGN KEY (`id_mahasiswa`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
 -- Constraints for table `user`
 --
 ALTER TABLE `user`
-  ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`dosen_pembimbing`) REFERENCES `user` (`id`);
+  ADD CONSTRAINT `user_ibfk_1` FOREIGN KEY (`id_dosen_pembimbing`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `user_ibfk_2` FOREIGN KEY (`id_ketua_penguji`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `user_ibfk_3` FOREIGN KEY (`id_dosen_penguji`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

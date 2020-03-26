@@ -16,8 +16,8 @@
                     </v-list-item>
                     <v-divider v-if="popUpBreakPoint"></v-divider>
                     <v-list-item @click="">
-                        <v-list-item-icon  class="mr-2"><v-icon>mdi-account</v-icon></v-list-item-icon>
-                        <v-list-item-content><v-list-item-title>Profil Saya</v-list-item-title></v-list-item-content>
+                        <v-list-item-icon  class="mr-2"><v-icon>mdi-account-key</v-icon></v-list-item-icon>
+                        <v-list-item-content><v-list-item-title>Ganti Password</v-list-item-title></v-list-item-content>
                     </v-list-item>
                     <v-list-item @click="logOut">
                         <v-list-item-icon class="mr-2"><v-icon color="red">mdi-power</v-icon></v-list-item-icon>
