@@ -33,6 +33,7 @@ class M_Berita_Acara extends CI_Model{
         $this->db->select('*');
         $this->db->from($this::TABLE_NAME);
         $this->db->where("id_mahasiswa='{$id}'");
+        $this->db->order_by('tanggal', 'DESC');
         return $this->db->get()->result_array();
     }
 
@@ -62,6 +63,11 @@ class M_Berita_Acara extends CI_Model{
         date_default_timezone_set('Asia/Jakarta');
         $this->db->where("tanggal >=", date('Y-m-d'));
         return $this->db->get()->result_array();
+    }
+
+    public function delete_by_id_mahasiswa($id) {
+        $this->db->delete($this::TABLE_NAME, "id_mahasiswa='{$id}'");
+        return $this->db->affected_rows();
     }
     
 }

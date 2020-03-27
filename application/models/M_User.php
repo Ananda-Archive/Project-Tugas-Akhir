@@ -22,6 +22,10 @@ class M_User extends CI_Model{
         ));
     }
 
+    public function is_not_exists($id) {
+        $this->db->get_where($this::TABLE_NAME, "id='{$id}'")->num_rows() == 0 ? true : false;
+    }
+
     public function insert($nomor,$nama,$password,$role,$id_dosen_pembimbing,$id_ketua_penguji,$id_dosen_penguji) {
         $this->db->insert($this::TABLE_NAME, array(
             'nomor' => $nomor,
@@ -98,5 +102,60 @@ class M_User extends CI_Model{
         $this->db->from($this::TABLE_NAME);
         $this->db->where("id='{$id_mahasiswa}'");
         return $this->db->get()->result_array();
+    }
+
+    public function update($id, $nomor, $nama, $role, $id_dosen_pembimbing, $id_ketua_penguji, $id_dosen_penguji) {
+        $result = $this->db->get_where($this::TABLE_NAME, array(
+            'id' => $id,
+            'nomor' => $nomor,
+            'nama' => $nama,
+            'role' => $role,
+            'id_dosen_pembimbing' => $id_dosen_pembimbing,
+            'id_ketua_penguji' => $id_ketua_penguji,
+            'id_dosen_penguji' => $id_dosen_penguji
+        ));
+        if ($result->num_rows() > 0) return true;
+        $this->db->update($this::TABLE_NAME, array(
+            'nomor' => $nomor,
+            'nama' => $nama,
+            'role' => $role,
+            'id_dosen_pembimbing' => $id_dosen_pembimbing,
+            'id_ketua_penguji' => $id_ketua_penguji,
+            'id_dosen_penguji' => $id_dosen_penguji
+
+        ), "id='{$id}'");
+
+        return $this->db->affected_rows();
+    }
+
+    public function is_dosen_pembimbing($id_mahasiswa) {
+        return $this->db->query("SELECT id_dosen_pembimbing FROM user WHERE id='$id_mahasiswa'")->result_array()[0]['id_dosen_pembimbing'];
+    }
+
+    public function is_ketua_penguji($id_mahasiswa) {
+        return $this->db->query("SELECT id_ketua_penguji FROM user WHERE id='$id_mahasiswa'")->result_array()[0]['id_ketua_penguji'];
+    }
+
+    public function is_dosen_penguji($id_mahasiswa) {
+        return $this->db->query("SELECT id_dosen_penguji FROM user WHERE id='$id_mahasiswa'")->result_array()[0]['id_dosen_penguji'];
+    }
+
+    public function delete($id) {
+        $this->db->delete($this::TABLE_NAME, "id='{$id}'");
+        return $this->db->affected_rows();
+    }
+
+    public function change_password($id,$password) {
+        $result = $this->db->get_where($this::TABLE_NAME, array(
+            'id' => $id,
+            'password' => $password
+        ));
+        if ($result->num_rows() > 0) return true;
+
+        $this->db->update($this::TABLE_NAME, array(
+            'password' => $password
+        ), "id='{$id}'");
+
+        return $this->db->affected_rows();
     }
 }

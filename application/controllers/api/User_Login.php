@@ -24,7 +24,7 @@ class User_Login extends REST_Controller {
         if(!$this->session->userdata('id')) {
             $nama = $this->post('nama');
             $nomor = $this->post('nomor');
-            $password = $this->post('password');
+            // $password = $this->post('password');
             $password = hash('sha512', $this->post('password') . config_item('encryption_key'));
             // Kalau parameter nomor kosong
             if(!isset($nomor)) {

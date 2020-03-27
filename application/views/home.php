@@ -179,13 +179,17 @@
 											:search="searchMahasiswa"
 										>
 											<template class="pl-n4" v-slot:item.id_dosen_pembimbing="{ item }">
-												<span>{{ revealDosenPembimbing(item.id_dosen_pembimbing) }}</span>
+												<span v-if="item.id_dosen_pembimbing != null">{{ revealDosenPembimbing(item.id_dosen_pembimbing) }}</span>
 											</template>
 											<template class="pl-n4" v-slot:item.id_ketua_penguji="{ item }">
-												<span>{{ revealDosenPembimbing(item.id_ketua_penguji) }}</span>
+												<span v-if="item.id_ketua_penguji != null">{{ revealDosenPembimbing(item.id_ketua_penguji) }}</span>
 											</template>
 											<template class="pl-n4" v-slot:item.id_dosen_penguji="{ item }">
-												<span>{{ revealDosenPembimbing(item.id_dosen_penguji) }}</span>
+												<span v-if="item.id_dosen_penguji != null">{{ revealDosenPembimbing(item.id_dosen_penguji) }}</span>
+											</template>
+											<template v-slot:item.actions="{ item }">
+												<v-icon class="mr-2" @click.stop="editMahasiswa(item)">mdi-pencil</v-icon>
+												<v-icon class="mr-2" @click.stop="confirmDeleteUser(item)">mdi-delete</v-icon>
 											</template>
 										</v-data-table>
 										<v-data-table
@@ -213,10 +217,10 @@
 																	<v-card-actions><v-icon v-on="on">mdi-dots-vertical</v-icon></v-card-actions>
 																</template>
 																<v-list>
-																	<v-list-item @click.stop="">
+																	<v-list-item @click.stop="editMahasiswa(item)">
 																		<v-list-item-title>Edit</v-list-item-title>
 																	</v-list-item>
-																	<v-list-item @click.stop="">
+																	<v-list-item @click.stop="confirmDeleteUser(item)">
 																		<v-list-item-title>Hapus</v-list-item-title>
 																	</v-list-item>
 																</v-list>
@@ -227,25 +231,165 @@
 													<v-list-item two-line>
 														<v-list-item-content>
 															<v-list-item-title>Dosen Pembimbing</v-list-item-title>
-															<v-list-item-subtitle>{{ revealDosenPembimbing(item.id_dosen_pembimbing) }}</v-list-item-subtitle>
+															<v-list-item-subtitle v-if="item.id_dosen_pembimbing != null">{{ revealDosenPembimbing(item.id_dosen_pembimbing) }}</v-list-item-subtitle>
 														</v-list-item-content>
 													</v-list-item>
 													<v-list-item two-line class="mt-n2">
 														<v-list-item-content>
 															<v-list-item-title>Ketua Dosen Penguji</v-list-item-title>
-															<v-list-item-subtitle>{{ revealKetuaPenguji(item.id_ketua_penguji) }}</v-list-item-subtitle>
+															<v-list-item-subtitle v-if="item.id_ketua_penguji != null">{{ revealKetuaPenguji(item.id_ketua_penguji) }}</v-list-item-subtitle>
 														</v-list-item-content>
 													</v-list-item>
 													<v-list-item two-line class="mt-n2">
 														<v-list-item-content>
 															<v-list-item-title>Dosen Penguji 1</v-list-item-title>
-															<v-list-item-subtitle>{{ revealDosenPenguji(item.id_dosen_penguji) }}</v-list-item-subtitle>
+															<v-list-item-subtitle v-if="item.id_dosen_penguji != null">{{ revealDosenPenguji(item.id_dosen_penguji) }}</v-list-item-subtitle>
 														</v-list-item-content>
 													</v-list-item>
 												</v-card>
 											</template>
 										</v-data-table>
 									</v-card>
+									<!-- Delete User -->
+									<v-dialog style="z-index:999" v-model="confirmDeleteUserDialog" persistent max-width="500px">
+										<v-card>
+											<v-card-title>Konfirmasi</v-card-title>
+											<v-card-text>Apakah Anda Yakin Ingin Menghapus {{editField.nama}}?</v-card-text>
+											<v-card-actions>
+												<v-container>
+													<v-row justify="center">
+														<v-btn class="mt-n5" color="red darken-1" text @click="confirmDeleteUserDialog = false">Tidak</v-btn>
+														<v-btn class="mt-n5" color="blue darken-1" text @click="deleteUser">Ya</v-btn>
+													</v-row>
+												</v-container>
+											</v-card-actions>
+										</v-card>
+									</v-dialog>
+									<!-- EDIT USER -->
+									<v-dialog v-model="editMahasiswaDialog" persistent max-width="700px">
+										<v-card>
+											<v-toolbar dense flat color="blue">
+												<span class="title font-weight-light">Edit User</span>
+												<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
+											</v-toolbar>
+											<v-form ref="form" class="px-2">
+												<v-card-text>
+													<v-row>
+														<v-row justify="end" class="pr-4">
+															<v-chip @click="changePasswordDefaultDialog = !changePasswordDefaultDialog" label dense class="mb-n4 pa-n4" color="transparent orange--text">Klik Disini Untuk Reset Password</v-chip>
+														</v-row>
+														<v-col cols="12">
+															<v-text-field class="mb-n4" color="blue" label="NIP / NIM" v-model="editField.nomor" :rules="rules.nomor"/>
+														</v-col>
+														<v-col cols="12">
+															<v-text-field class="mb-n4" color="blue" label="Nama" v-model="editField.nama" :rules="rules.nama"/>
+														</v-col>
+														<v-col cols="12">
+															<v-select
+																:items="listRole"
+																v-model="editField.role"
+																label="Status"
+																class="mb-n2"
+																item-text="value"
+																item-value="id"
+															>
+															</v-select>
+														</v-col>
+														<v-col cols="12">
+															<v-autocomplete
+																v-if="+editField.role == 0"
+																v-model="editField.id_dosen_pembimbing"
+																:items="listDosen"
+																label="Dosen Pembimbing"
+																chips
+																dense
+																:clearable="true"
+																:auto-select-first="true"
+																color="blue"
+																item-color="blue"
+																:search-input.sync="dosenPembimbingInput"
+																@change="dosenPembimbingInput=''"
+																item-text="nama"
+																item-value="id"
+																:readonly="editField.id_dosen_pembimbing != null"
+																@click:clear="editField.id_dosen_pembimbing = null"
+																class="mb-n2"
+															>
+															<template v-slot:selection="data">
+																<v-chip color="transparent" class="pa-0">
+																	{{data.item.nama}}
+																</v-chip>
+															</template>
+															</v-autocomplete>
+														</v-col>
+														<v-col cols="12">
+															<v-autocomplete
+																v-if="+editField.role == 0"
+																v-model="editField.id_ketua_penguji"
+																:items="listDosen"
+																label="Ketua Dosen Penguji"
+																chips
+																dense
+																:clearable="true"
+																:auto-select-first="true"
+																color="blue"
+																item-color="blue"
+																:search-input.sync="ketuaDosenPengujiInput"
+																@change="ketuaDosenPengujiInput=''"
+																item-text="nama"
+																item-value="id"
+																:readonly="editField.id_ketua_penguji != null"
+																@click:clear="editField.id_ketua_penguji = null"
+																class="mb-n2"
+															>
+															<template v-slot:selection="data">
+																<v-chip color="transparent" class="pa-0">
+																	{{data.item.nama}}
+																</v-chip>
+															</template>
+															</v-autocomplete>
+														</v-col>
+														<v-col cols="12">
+															<v-autocomplete
+																v-if="+editField.role == 0"
+																v-model="editField.id_dosen_penguji"
+																:items="listDosen"
+																label="Dosen Penguji 1"
+																chips
+																dense
+																:clearable="true"
+																:auto-select-first="true"
+																color="blue"
+																item-color="blue"
+																:search-input.sync="dosenPengujiInput"
+																@change="dosenPengujiInput=''"
+																item-text="nama"
+																item-value="id"
+																:readonly="editField.id_dosen_penguji != null"
+																@click:clear="editField.id_dosen_penguji = null"
+																class="mb-n2"
+															>
+															<template v-slot:selection="data">
+																<v-chip color="transparent" class="pa-0">
+																	{{data.item.nama}}
+																</v-chip>
+															</template>
+															</v-autocomplete>
+														</v-col>
+													</v-row>
+												</v-card-text>
+											</v-form>
+											<v-card-actions>
+												<v-container>
+													<v-row justify="center">
+														<v-btn class="mt-n8" color="red darken-1" text @click="close">Cancel</v-btn>
+														<v-btn class="mt-n8" color="green white--text" @click="updateUser">Update</v-btn>
+													</v-row>
+												</v-container>
+											</v-card-actions>
+										</v-card>
+									</v-dialog>
+									<!--  -->
 								</v-dialog>
 								<v-col cols="12" sm="12" md="3" v-if="<?=$role?>==2">
                                     <v-card @click="listDosenDialog = !listDosenDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
@@ -281,8 +425,152 @@
 											:items='users'
 											:mobile-breakpoint="1"
 											:search="searchDosen"
-										></v-data-table>
+										>
+											<template v-slot:item.actions="{ item }">
+												<v-icon class="mr-2" @click.stop="editDosen(item)">mdi-pencil</v-icon>
+												<v-icon class="mr-2" @click.stop="confirmDeleteUser(item)">mdi-delete</v-icon>
+											</template>
+										</v-data-table>
 									</v-card>
+									<!-- Delete User -->
+									<v-dialog style="z-index:999" v-model="confirmDeleteUserDialog" persistent max-width="500px">
+										<v-card>
+											<v-card-title>Konfirmasi</v-card-title>
+											<v-card-text>Apakah Anda Yakin Ingin Menghapus {{editField.nama}}?</v-card-text>
+											<v-card-actions>
+												<v-container>
+													<v-row justify="center">
+														<v-btn class="mt-n5" color="red darken-1" text @click="confirmDeleteUserDialog = false">Tidak</v-btn>
+														<v-btn class="mt-n5" color="blue darken-1" text @click="deleteUser">Ya</v-btn>
+													</v-row>
+												</v-container>
+											</v-card-actions>
+										</v-card>
+									</v-dialog>
+									<!-- EDIT USER -->
+									<v-dialog v-model="editDosenDialog" persistent max-width="700px">
+										<v-card>
+											<v-toolbar dense flat color="blue">
+												<span class="title font-weight-light">Edit User</span>
+												<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
+											</v-toolbar>
+											<v-form ref="form" class="px-2">
+												<v-card-text>
+													<v-row>
+														<v-row justify="end" class="pr-4">
+															<v-chip @click="changePasswordDefaultDialog = !changePasswordDefaultDialog" label dense class="mb-n4 pa-n4" color="transparent orange--text">Klik Disini Untuk Reset Password</v-chip>
+														</v-row>
+														<v-col cols="12">
+															<v-text-field class="mb-n4" color="blue" label="NIP / NIM" v-model="editField.nomor" :rules="rules.nomor"/>
+														</v-col>
+														<v-col cols="12">
+															<v-text-field class="mb-n4" color="blue" label="Nama" v-model="editField.nama" :rules="rules.nama"/>
+														</v-col>
+														<v-col cols="12">
+															<v-select
+																:items="listRole"
+																v-model="editField.role"
+																label="Status"
+																class="mb-n2"
+																item-text="value"
+																item-value="id"
+															>
+															</v-select>
+														</v-col>
+														<v-col cols="12">
+															<v-autocomplete
+																v-if="+editField.role == 0"
+																v-model="editField.id_dosen_pembimbing"
+																:items="listDosen"
+																label="Dosen Pembimbing"
+																chips
+																dense
+																:clearable="true"
+																:auto-select-first="true"
+																color="blue"
+																item-color="blue"
+																:search-input.sync="dosenPembimbingInput"
+																@change="dosenPembimbingInput=''"
+																item-text="nama"
+																item-value="id"
+																:readonly="editField.id_dosen_pembimbing != null"
+																@click:clear="editField.id_dosen_pembimbing = null"
+																class="mb-n2"
+															>
+															<template v-slot:selection="data">
+																<v-chip color="transparent" class="pa-0">
+																	{{data.item.nama}}
+																</v-chip>
+															</template>
+															</v-autocomplete>
+														</v-col>
+														<v-col cols="12">
+															<v-autocomplete
+																v-if="+editField.role == 0"
+																v-model="editField.id_ketua_penguji"
+																:items="listDosen"
+																label="Ketua Dosen Penguji"
+																chips
+																dense
+																:clearable="true"
+																:auto-select-first="true"
+																color="blue"
+																item-color="blue"
+																:search-input.sync="ketuaDosenPengujiInput"
+																@change="ketuaDosenPengujiInput=''"
+																item-text="nama"
+																item-value="id"
+																:readonly="editField.id_ketua_penguji != null"
+																@click:clear="editField.id_ketua_penguji = null"
+																class="mb-n2"
+															>
+															<template v-slot:selection="data">
+																<v-chip color="transparent" class="pa-0">
+																	{{data.item.nama}}
+																</v-chip>
+															</template>
+															</v-autocomplete>
+														</v-col>
+														<v-col cols="12">
+															<v-autocomplete
+																v-if="+editField.role == 0"
+																v-model="editField.id_dosen_penguji"
+																:items="listDosen"
+																label="Dosen Penguji 1"
+																chips
+																dense
+																:clearable="true"
+																:auto-select-first="true"
+																color="blue"
+																item-color="blue"
+																:search-input.sync="dosenPengujiInput"
+																@change="dosenPengujiInput=''"
+																item-text="nama"
+																item-value="id"
+																:readonly="editField.id_dosen_penguji != null"
+																@click:clear="editField.id_dosen_penguji = null"
+																class="mb-n2"
+															>
+															<template v-slot:selection="data">
+																<v-chip color="transparent" class="pa-0">
+																	{{data.item.nama}}
+																</v-chip>
+															</template>
+															</v-autocomplete>
+														</v-col>
+													</v-row>
+												</v-card-text>
+											</v-form>
+											<v-card-actions>
+												<v-container>
+													<v-row justify="center">
+														<v-btn class="mt-n8" color="red darken-1" text @click="close">Cancel</v-btn>
+														<v-btn class="mt-n8" color="green white--text" @click="updateUser">Update</v-btn>
+													</v-row>
+												</v-container>
+											</v-card-actions>
+										</v-card>
+									</v-dialog>
 								</v-dialog>
 								<v-col cols="12" sm="12" md="3" v-if="<?=$role?>==2">
                                     <v-card @click="createBeritaAcaraDialog = !createBeritaAcaraDialog" class="elevation-12 align-center" color="blue" min-height="230" max-height="230">
@@ -476,6 +764,62 @@
                             </v-icon>
                         </v-btn>
                     </v-snackbar>
+					<!-- change Password default -->
+					<v-dialog style="z-index:999" v-model="changePasswordDefaultDialog" persistent max-width="500px">
+						<v-card>
+							<v-card-title>Konfirmasi</v-card-title>
+							<v-card-text>Apakah Anda Yakin Ingin Reset Password {{editField.nama}}?</v-card-text>
+							<v-card-actions>
+								<v-container>
+									<v-row justify="center">
+										<v-btn class="mt-n5" color="red darken-1" text @click="changePasswordDefaultDialog = false">Tidak</v-btn>
+										<v-btn class="mt-n5" color="blue darken-1" text @click="changePasswordDefault">Ya</v-btn>
+									</v-row>
+								</v-container>
+							</v-card-actions>
+						</v-card>
+					</v-dialog>
+					<!-- Change Password Pop Up -->
+					<v-dialog v-model="changePasswordDialog" max-width="600px" persistent>
+						<v-toolbar dense flat color="blue">
+							<span class="title font-weight-light">Ganti Password</span>
+							<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
+						</v-toolbar>
+						<v-form ref="form" class="px-2">
+							<v-card-text>
+							<v-row>
+								<v-col cols="12">
+									<v-text-field
+										v-model="passwordAfter"
+										label="Password Baru"
+										:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+										:type="showPassword ? 'text' : 'password'"
+										@click:append="showPassword = !showPassword"
+										:rules='rules.passwordAfter'
+									></v-text-field>
+								</v-col>
+								<v-col cols="12">
+									<v-text-field
+										v-model="passwordAfterConfirmation"
+										label="Konfirmasi Password"
+										:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+										:type="showPassword ? 'text' : 'password'"
+										@click:append="showPassword = !showPassword"
+										:rules='rules.passwordConfirm'
+									></v-text-field>
+								</v-col>
+							</v-row>
+							</v-card-text>
+						</v-form>
+						<v-card-actions>
+							<v-container>
+								<v-row justify="center">
+									<v-btn class="mt-n8" color="red darken-1" text @click="close">Cancel</v-btn>
+									<v-btn class="mt-n8" color="green white--text" @click="changePassword">Change Password</v-btn>
+								</v-row>
+							</v-container>
+						</v-card-actions>
+					</v-dialog>
 				</v-content>
 			</v-app>
 		</div>
@@ -526,6 +870,27 @@
 							id_ketua_penguji:null,
 							id_dosen_penguji:null
 						},
+						editField: {
+							id:null,
+							nomor:'',
+							nama:'',
+							password:'',
+							role:null,
+							id_dosen_pembimbing:null,
+							id_ketua_penguji:null,
+							id_dosen_penguji:null
+						},
+						editFieldDefault: {
+							id:null,
+							nomor:'',
+							nama:'',
+							password:'',
+							role:null,
+							id_dosen_pembimbing:null,
+							id_ketua_penguji:null,
+							id_dosen_penguji:null
+						},
+						password: null,
 						beritaAcara: {
 							tanggal:'',
 							time:'',
@@ -544,9 +909,9 @@
 						dosenPengujiInput:'',
 						mahasiswaInput:'',
 						listRole: [
-							{id:0, value:'Mahasiswa'},
-							{id:1, value:'Dosen'},
-							{id:2, value:'Admin'}
+							{id:'0', value:'Mahasiswa'},
+							{id:'1', value:'Dosen'},
+							{id:'2', value:'Admin'}
 						],
 						rules: {
 							nomor: [
@@ -561,15 +926,132 @@
 							],
 							time: [
 								v => !!v || 'Jam Wajib diisi',
+							],
+                            password: [
+                                v => !!v || 'Password Wajib diisi',
+                                v => v.length>=8 || 'Minimal 8 Karakter',
+                            ],
+							passwordAfter: [
+								v => !!v || 'Password Wajib diisi',
+                                v => v == this.passwordAfter || 'Password Konfirmasi Harus Sama Dengan Password Baru',
+								v => v.length>=8 || 'Minimal 8 Karakter',
+							],
+							passwordConfirm: [
+								v => !!v || 'Password Wajib diisi',
+                                v => v == this.passwordAfter || 'Password Konfirmasi Harus Sama Dengan Password Baru',
 							]
 						},
 						snackBar: false,
                         snackBarColor: '',
                         snackBarMessage: '',
+						selectedIndex: -1,
+						editMahasiswaDialog: false,
+						editDosenDialog: false,
+						confirmDeleteUserDialog: false,
+						showPassword: false,
+						changePasswordDialog: false,
+						changePasswordDefaultDialog: false,
+						passwordAfter:'',
+						passwordAfterConfirmation:''
 					}
 				},
 
 				methods: {
+					changePasswordOpenDialog() {
+						this.changePasswordDialog = true
+					},
+					changePasswordDefault() {
+						return new Promise((resolve, reject) => {
+							let data = {
+								id: this.editField.id,
+								nomor: this.editField.nomor
+							}
+							axios.put('<?= base_url()?>api/Password', data)
+							.then(response => {
+										resolve(response.data)
+									}) .catch(err => {
+										if(err.response.status == 500) reject(err.response.data)
+									})
+						})
+						.then((response) => {
+							this.snackBarMessage = response.message
+							this.snackBarColor = 'success'
+						}) .catch(err => {
+							this.snackBarMessage = err.message
+							this.snackBarColor = 'error'
+							this.snackBar = true
+						}) .finally(() => {
+							this.snackBar = true
+							this.get()
+							this.changePasswordDefaultDialog = false
+						})
+					},
+					changePassword() {
+						if(this.$refs.form.validate()) {
+							return new Promise((resolve, reject) => {
+								let data = {
+									id: <?=$id?>,
+									password: this.passwordAfter
+								}
+								axios.put('<?= base_url()?>api/Password', data)
+								.then(response => {
+											resolve(response.data)
+										}) .catch(err => {
+											if(err.response.status == 500) reject(err.response.data)
+										})
+							})
+							.then((response) => {
+								this.snackBarMessage = response.message
+								this.snackBarColor = 'success'
+							}) .catch(err => {
+								this.snackBarMessage = err
+								this.snackBarColor = 'error'
+								this.snackBar = true
+							}) .finally(() => {
+								this.snackBar = true
+								this.get()
+								this.close()
+							})
+						}
+					},
+					editMahasiswa(item) {
+						this.selectedIndex = this.users.indexOf(item)
+						this.editField = Object.assign({},item)
+						this.editMahasiswaDialog = true
+					},
+					editDosen(item) {
+						this.selectedIndex = this.users.indexOf(item)
+						this.editField = Object.assign({},item)
+						this.editDosenDialog = true
+					},
+					confirmDeleteUser(item) {
+						this.selectedIndex = this.users.indexOf(item)
+						this.editField = Object.assign({},item)
+						this.confirmDeleteUserDialog = true
+					},
+					deleteUser() {
+						return new Promise((resolve, reject) => {
+							axios.delete('<?= base_url()?>api/User', {params: {id: this.editField.id}})
+								.then(() => {
+									resolve('Delete Success')
+								}) .catch((err) => {
+									if(error.response.status == 500) reject(serverErrorMessage)
+								})
+						})
+						.then((response) => {
+							this.snackBarMessage = response
+							this.snackBarColor = 'success'
+						}) .catch(err => {
+							this.snackBarMessage = err
+							this.snackBarColor = 'error'
+							this.snackBar = true
+						}) .finally(() => {
+							this.snackBar = true
+							this.get()
+							this.editField = Object.assign({},this.editFieldDefault)
+							this.close()
+						})
+					},
                     logOut() {
                         window.location.href = '<?=base_url('home/logOut');?>'
                     },
@@ -618,8 +1100,52 @@
 							})
 						})
 					},
+					updateUser() {
+						if(this.$refs.form.validate()) {
+							if(this.editField.role != '0') {
+								this.editField.id_dosen_pembimbing = null
+								this.editField.id_ketua_penguji = null
+								this.editField.id_dosen_penguji = null
+							}
+							return new Promise((resolve, reject) => {
+								let data = {
+									id:this.editField.id,
+									nomor:this.editField.nomor,
+									nama:this.editField.nama,
+									role:this.editField.role,
+									id_dosen_pembimbing:this.editField.id_dosen_pembimbing,
+									id_ketua_penguji:this.editField.id_ketua_penguji,
+									id_dosen_penguji:this.editField.id_dosen_penguji
+								}
+								axios.put('<?= base_url()?>api/User',this.editField)
+									.then(response => {
+										resolve(response.data)
+									}) .catch(err => {
+										if(err.response.status == 500) reject(err.response.data)
+									})
+							})
+							.then((response) => {
+								this.snackBarMessage = response.message
+								this.snackBarColor = 'success'
+							}) .catch(err => {
+								this.snackBarMessage = err
+								this.snackBarColor = 'error'
+								this.snackBar = true
+							}) .finally(() => {
+								this.snackBar = true
+								this.get()
+								this.editField = Object.assign({},this.editFieldDefault)
+								this.close()
+							})
+						}
+					},
 					createNewUser() {
 						if(this.$refs.form.validate()) {
+							if(this.user.role != '0') {
+								this.user.id_dosen_pembimbing = null
+								this.user.id_ketua_penguji = null
+								this.user.id_dosen_penguji = null
+							}
 							return new Promise((resolve, reject) => {
 								axios.post('<?= base_url()?>api/User',this.user)
 									.then(response => {
@@ -680,11 +1206,11 @@
 							this.createNewUserDialog = false
 							this.user = Object.assign({},this.userDefault)
 						} else {
-							if(this.listMahasiswaDialog) {
+							if(this.listMahasiswaDialog && !this.editMahasiswaDialog && !this.confirmDeleteUserDialog) {
 								this.listMahasiswaDialog = false
 								this.searchMahasiswa = ''
 							} else {
-								if(this.listDosenDialog) {
+								if(this.listDosenDialog && !this.editDosenDialog && !this.confirmDeleteUserDialog) {
 									this.listDosenDialog = false
 									this.searchDosen = ''
 								} else {
@@ -695,6 +1221,22 @@
 										if(this.listBeritaAcaraDialog) {
 											this.listBeritaAcaraDialog = false
 											this.searchBeritaAcara = ''
+										} else {
+											if(this.editMahasiswaDialog || this.confirmDeleteUserDialog) {
+												this.editMahasiswaDialog = false
+												this.editField = Object.assign({},this.editFieldDefault)
+											} else {
+												if(this.changePasswordDialog) {
+													this.changePasswordDialog = false
+													this.passwordAfter=''
+													this.passwordAfterConfirmation=''
+												} else {
+													if(this.editDosenDialog) {
+														this.editDosenDialog = false
+														this.editField = Object.assign({},this.editFieldDefault)
+													}
+												}
+											}
 										}
 									}
 								}
@@ -732,13 +1274,15 @@
 							{value:'role', align: ' d-none', filter: value => {return value == 0}},
 							{text:'Dosen Pembimbing', value:'id_dosen_pembimbing', filter: () => true},
 							{text:'Ketua Dosen Penguji', value:'id_ketua_penguji', filter: () => true},
-							{text:'Dosen Penguji 1', value:'id_dosen_penguji', filter: () => true}
+							{text:'Dosen Penguji 1', value:'id_dosen_penguji', filter: () => true},
+							{value:'actions', filter:() => true}
 						]
 					},
 					dosenHeader() {
 						return [
 							{text:'Nama', value:'nama'},
 							{value:'role', align: ' d-none', filter: value => {return value == 1}},
+							{value:'actions', filter:() => true}
 						]
 					},
 					beritaAcaraHeader() {
@@ -746,7 +1290,8 @@
 							{text:'NIM', value:'mahasiswa[0].nomor'},
 							{text:'Nama', value:'mahasiswa[0].nama'},
 							{text:'Tanggal', value:'tanggal', filter: () => true},
-							{text:'Jam', value:'time', filter: () => true}
+							{text:'Jam', value:'time', filter: () => true},
+							{value:'actions', filter:() => true}
 						]
 					},
 					formatDate() {

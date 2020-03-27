@@ -53,6 +53,11 @@ class M_Berkas extends CI_Model{
         return $this->db->affected_rows();
     }
 
+    public function delete_by_id_mahasiswa($id) {
+        $this->db->delete($this::TABLE_NAME, "id_mahasiswa='{$id}'");
+        return $this->db->affected_rows();
+    }
+
     public function store_revisi_pembimbing($id_mahasiswa, $id_dosen_pembimbing, $id_ketua_penguji, $id_dosen_penguji, $file, $revisi_dosen_pembimbing, $revisi_ketua_penguji, $revisi_dosen_penguji, $status_ketua_penguji, $status_dosen_penguji) {
         $this->db->insert($this::TABLE_NAME, array(
             'id_mahasiswa' => $id_mahasiswa,

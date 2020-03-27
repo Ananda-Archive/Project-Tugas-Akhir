@@ -15,7 +15,7 @@
                         <v-list-item-content><?=$nama?></v-list-item-content>
                     </v-list-item>
                     <v-divider v-if="popUpBreakPoint"></v-divider>
-                    <v-list-item @click="">
+                    <v-list-item @click="changePasswordOpenDialog">
                         <v-list-item-icon  class="mr-2"><v-icon>mdi-account-key</v-icon></v-list-item-icon>
                         <v-list-item-content><v-list-item-title>Ganti Password</v-list-item-title></v-list-item-content>
                     </v-list-item>

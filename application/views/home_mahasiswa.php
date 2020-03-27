@@ -199,6 +199,49 @@
                             </v-icon>
                         </v-btn>
                     </v-snackbar>
+					<!-- Change Password Pop Up -->
+					<v-dialog v-model="changePasswordDialog" max-width="600px" persistent>
+						<v-card>
+							<v-toolbar dense flat color="blue">
+								<span class="title font-weight-light">Ganti Password</span>
+								<v-btn absolute right icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
+							</v-toolbar>
+							<v-form ref="form" class="px-2">
+								<v-card-text>
+								<v-row>
+									<v-col cols="12">
+										<v-text-field
+											v-model="passwordAfter"
+											label="Password Baru"
+											:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+											:type="showPassword ? 'text' : 'password'"
+											@click:append="showPassword = !showPassword"
+											:rules='rules.passwordAfter'
+										></v-text-field>
+									</v-col>
+									<v-col cols="12">
+										<v-text-field
+											v-model="passwordAfterConfirmation"
+											label="Konfirmasi Password"
+											:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+											:type="showPassword ? 'text' : 'password'"
+											@click:append="showPassword = !showPassword"
+											:rules='rules.passwordConfirm'
+										></v-text-field>
+									</v-col>
+								</v-row>
+								</v-card-text>
+							</v-form>
+							<v-card-actions>
+								<v-container>
+									<v-row justify="center">
+										<v-btn class="mt-n8" color="red darken-1" text @click="close">Cancel</v-btn>
+										<v-btn class="mt-n8" color="green white--text" @click="changePassword">Change Password</v-btn>
+									</v-row>
+								</v-container>
+							</v-card-actions>
+						</v-card>
+					</v-dialog>
 				</v-content>
 			</v-app>
 		</div>
@@ -230,11 +273,57 @@
 						test: '',
 						fileRule: [
 							v => !!v || 'File is required',
-						]
+						],
+						changePasswordDialog: false,
+						passwordAfter:'',
+						passwordAfterConfirmation:'',
+						showPassword:false,
+						rules: {
+							passwordAfter: [
+								v => !!v || 'Password Wajib diisi',
+                                v => v == this.passwordAfter || 'Password Konfirmasi Harus Sama Dengan Password Baru',
+								v => v.length>=8 || 'Minimal 8 Karakter',
+							],
+							passwordConfirm: [
+								v => !!v || 'Password Wajib diisi',
+                                v => v == this.passwordAfter || 'Password Konfirmasi Harus Sama Dengan Password Baru',
+							]
+						},
 					}
 				},
 
 				methods: {
+					changePasswordOpenDialog() {
+						this.changePasswordDialog = true
+					},
+					changePassword() {
+						if(this.$refs.form.validate()) {
+							return new Promise((resolve, reject) => {
+								let data = {
+									id: <?=$id?>,
+									password: this.passwordAfter
+								}
+								axios.put('<?= base_url()?>api/Password', data)
+								.then(response => {
+											resolve(response.data)
+										}) .catch(err => {
+											if(err.response.status == 500) reject(err.response.data)
+										})
+							})
+							.then((response) => {
+								this.snackBarMessage = response.message
+								this.snackBarColor = 'success'
+							}) .catch(err => {
+								this.snackBarMessage = err
+								this.snackBarColor = 'error'
+								this.snackBar = true
+							}) .finally(() => {
+								this.snackBar = true
+								this.get()
+								this.close()
+							})
+						}
+					},
 					logOut() {
                         window.location.href = '<?=base_url('home/logOut');?>'
 					},
@@ -311,6 +400,12 @@
 							} else {
 								if(this.viewBeritaAcaraDialog) {
 									this.viewBeritaAcaraDialog = false
+								} else {
+									if(this.changePasswordDialog) {
+										this.changePasswordDialog = false
+										this.passwordAfter=''
+										this.passwordAfterConfirmation=''
+									}
 								}
 							}
 						}

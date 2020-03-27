@@ -23,6 +23,7 @@ class User extends REST_Controller {
     public function index_post(){
                 $nomor = $this->post('nomor');
                 $nama = $this->post('nama');
+                // $password = $this->post('nomor');
                 $password = hash('sha512',$this->post('nomor') . config_item('encryption_key'));
                 $role = $this->post('role');
                 $dosen_penguji = $this->post('dosen_penguji');
@@ -111,6 +112,83 @@ class User extends REST_Controller {
                 $idx++;
             }
             $this->response($result,REST_Controller::HTTP_OK);
+        }
+    }
+
+    public function index_put() {
+        $id = $this->put('id');
+        $nomor = $this->put('nomor');
+        $nama = $this->put('nama');
+        $role = $this->put('role');
+        $id_dosen_pembimbing = $this->put('id_dosen_pembimbing');
+        $id_ketua_penguji = $this->put('id_ketua_penguji');
+        $id_dosen_penguji = $this->put('id_dosen_penguji');
+        if(!isset($id)){
+            $this->response(
+                array(
+                    'status' => FALSE,
+                    'message' => $this::REQUIRED_PARAMETER_MESSAGE." id"
+                ),
+                REST_Controller::HTTP_BAD_REQUEST
+            );
+            return;
+        }
+        if($this->M_User->is_not_exists($id)){
+            $this->response(
+                array(
+                    'status' => FALSE,
+                    'message' => $this::INVALID_ID_MESSAGE. " id does not exist"
+                ),
+                REST_Controller::HTTP_BAD_REQUEST
+            );
+            return;
+        }
+        if(($id_dosen_pembimbing != $this->M_User->is_dosen_pembimbing($id)) || ($id_ketua_penguji != $this->M_User->is_ketua_penguji($id)) || ($id_dosen_penguji != $this->M_User->is_dosen_penguji($id))) {
+            $this->M_Berkas->delete_by_id_mahasiswa($id);
+            $this->M_Berita_Acara->delete_by_id_mahasiswa($id);
+        }
+        if ($this->M_User->update($id, $nomor, $nama, $role, $id_dosen_pembimbing, $id_ketua_penguji, $id_dosen_penguji)) {
+            $this->response(
+                array(
+                    'status' => TRUE,
+                    'message' => $this::UPDATE_SUCCESS_MESSSAGE
+                ), REST_Controller::HTTP_OK
+            );
+        } else {
+            $this->response(
+                array(
+                    'status' => FALSE,
+                    'message' => $this::UPDATE_FAILED_MESSAGE
+                ),REST_Controller::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    public function index_delete() {
+        $id = $this->input->get('id');
+        if (!isset($id)) {
+            $this->response(
+                array(
+                    'status' => FALSE,
+                    'message' => $this::REQUIRED_PARAMETER_MESSAGE."id"
+                ),REST_Controller::HTTP_BAD_REQUEST
+            );
+            return;
+        }
+        if ($this->M_User->delete($id)) {
+            $this->response(
+                array(
+                    'status' => TRUE,
+                    'message' => $this::DELETE_SUCCESS_MESSSAGE
+                ), REST_Controller::HTTP_OK
+            );
+        } else {
+            $this->response(
+                array(
+                    'status' => FALSE,
+                    'message' => $this::DELETE_FAILED_MESSAGE
+                ),REST_Controller::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 
